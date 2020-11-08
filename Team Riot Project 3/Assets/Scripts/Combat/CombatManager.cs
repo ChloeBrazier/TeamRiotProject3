@@ -94,7 +94,7 @@ public class CombatManager : MonoBehaviour
             }
             
         }
-        GenFloor();
+        //GenFloor();
         //Destroy(reftile);
 
 
