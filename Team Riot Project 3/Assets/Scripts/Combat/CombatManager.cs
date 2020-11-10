@@ -11,24 +11,49 @@ public class CombatManager : MonoBehaviour
 {
     // Start is called before the first frame update
     GameObject cam;
-    public GameObject right;
-    public GameObject left;
+    GameObject right;
+    GameObject left;
     Camera mainCam;
     int rows = 6;
     int cols = 4;
     float tileSize = 1;
     public GameObject reftile;
+    public GameObject Player;
+    public GameObject floor;
+    float move_width;
+    float move_height;
+    GameObject[] tiles;
+    public enum combatOptions
+    {
+        move, attack, flee, none
+    }
+
+    combatOptions currentOpt;
+
     void Start()
     {
+        
         cam = GameObject.FindGameObjectWithTag("MainCamera");
         mainCam = cam.GetComponent<Camera>();
+        tiles = GameObject.FindGameObjectsWithTag("tile");
+        GameObject starttile = tiles[13];
+        var spr_render = starttile.GetComponent<SpriteRenderer>().bounds.size;
+        move_width = spr_render.x;
+        move_height = spr_render.y;
+        var n_p = starttile.transform.position;
+        n_p.z = -3;
+        Player.transform.position = n_p;
+        currentOpt = combatOptions.none;
+        Debug.Log(currentOpt);
+        CheckIntersect(Player, starttile);
+
        // mainCam.rect.width;
-        if(right == null && left == null)
+        /*if(right == null && left == null)
         {
             right = (GameObject)Resources.Load("tile_right");
             left = (GameObject)Resources.Load("tile_left");
             reftile = (GameObject)Resources.Load("tile");
-        }
+        }*/
 
         void GenFloor()
         {
@@ -101,7 +126,29 @@ public class CombatManager : MonoBehaviour
         // Update is called once per frame
         void Update()
         {
+            if (currentOpt == combatOptions.none)
+            {
+
+            }
 
         }
+
+
+    }
+    
+    private bool CheckIntersect(GameObject obj1, GameObject obj2)
+    {
+        var p1 = obj1.transform.position;
+        var p2 = obj2.transform.position;
+        var x = p1.x / p2.x;
+        var y = p1.y / p2.y;
+        if(x > 0.5 || y > 0.5)
+        {
+            //Debug.Log(x);
+            //Debug.Log(y);
+            return true;
+        }
+        
+        return false;
     }
 }
