@@ -6,6 +6,9 @@ TagManager:
   tags:
   - combatmanager
   - player
+  - combatui
+  - enemy
+  - tile
   layers:
   - Default
   - TransparentFX
