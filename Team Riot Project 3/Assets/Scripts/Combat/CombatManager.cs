@@ -19,7 +19,9 @@ public class CombatManager : MonoBehaviour
     float tileSize = 1;
     public GameObject reftile;
     public GameObject Player;
+    private int currentPlayerTileIndex;
     public GameObject floor;
+    public GameObject Enemy;
     float move_width;
     float move_height;
     GameObject[] tiles;
@@ -36,13 +38,15 @@ public class CombatManager : MonoBehaviour
         cam = GameObject.FindGameObjectWithTag("MainCamera");
         mainCam = cam.GetComponent<Camera>();
         tiles = GameObject.FindGameObjectsWithTag("tile");
-        GameObject starttile = tiles[13];
+        GameObject starttile = tiles[0];
+        currentPlayerTileIndex = 0;
         var spr_render = starttile.GetComponent<SpriteRenderer>().bounds.size;
         move_width = spr_render.x;
         move_height = spr_render.y;
-        var n_p = starttile.transform.position;
-        n_p.z = -3;
-        Player.transform.position = n_p;
+        //var n_p = starttile.transform.position;
+        //n_p.z = -3;
+        Player.transform.position = starttile.transform.position;
+        Enemy.transform.position = tiles[14].transform.position;
         currentOpt = combatOptions.none;
         Debug.Log(currentOpt);
         CheckIntersect(Player, starttile);
@@ -123,19 +127,70 @@ public class CombatManager : MonoBehaviour
         //Destroy(reftile);
 
 
-        // Update is called once per frame
-        void Update()
-        {
-            if (currentOpt == combatOptions.none)
-            {
-
-            }
-
-        }
 
 
     }
-    
+    bool playerTurn = true;
+    // Update is called once per frame
+    void Update()
+    {
+        if (currentOpt == combatOptions.none)
+        {
+
+        }
+        if (playerTurn) 
+        {
+            PlayerMove();
+        }
+        else
+        {
+            EnemyMove();
+        }
+    }
+
+    void PlayerMove() 
+    {
+        if (Input.GetKeyDown(KeyCode.W)) 
+        {
+            if (currentPlayerTileIndex-tiles.Length/4>=0) 
+            {
+                currentPlayerTileIndex = currentPlayerTileIndex - tiles.Length / 4;
+                Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                playerTurn = false;
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.A))
+        {
+            if ((currentPlayerTileIndex+1)%7!=0) {
+                currentPlayerTileIndex = currentPlayerTileIndex + 1;
+                Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                playerTurn = false;
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.S))
+        {
+            if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
+            {
+                currentPlayerTileIndex = currentPlayerTileIndex + tiles.Length / 4;
+                Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                playerTurn = false;
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.D))
+        {
+            if ((currentPlayerTileIndex) % 7 != 0)
+            {
+                currentPlayerTileIndex = currentPlayerTileIndex - 1;
+                Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                playerTurn = false;  
+            }
+        }
+    }
+
+    void EnemyMove() 
+    {
+        
+    }
     private bool CheckIntersect(GameObject obj1, GameObject obj2)
     {
         var p1 = obj1.transform.position;
