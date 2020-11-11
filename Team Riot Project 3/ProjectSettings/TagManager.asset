@@ -9,11 +9,6 @@ TagManager:
   - combatui
   - enemy
   - tile
-  - menu
-  - move
-  - attack
-  - flee
-  - element
   layers:
   - Default
   - TransparentFX
