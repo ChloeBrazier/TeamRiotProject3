@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
@@ -21,10 +22,27 @@ public class CombatManager : MonoBehaviour
     public GameObject Player;
     private int currentPlayerTileIndex;
     public GameObject floor;
-    public GameObject Enemy;
+    //public GameObject Enemy;
     float move_width;
     float move_height;
     GameObject[] tiles;
+    //Menus
+    public GameObject combatmenu;
+    public GameObject elementmenu;
+    public GameObject movemenu;
+    public GameObject fleemenu;
+
+
+
+    bool w = false;
+    bool a = false;
+    bool s = false;
+    bool d = false;
+
+    bool playerTurn = false;
+    int player_lvl = 0;
+    float xp_nextlvl = 100.0f;
+    v3 menu_pos;
     public enum combatOptions
     {
         move, attack, flee, none
@@ -34,10 +52,11 @@ public class CombatManager : MonoBehaviour
 
     void Start()
     {
-        
+
         cam = GameObject.FindGameObjectWithTag("MainCamera");
         mainCam = cam.GetComponent<Camera>();
         tiles = GameObject.FindGameObjectsWithTag("tile");
+
         GameObject starttile = tiles[0];
         currentPlayerTileIndex = 0;
         var spr_render = starttile.GetComponent<SpriteRenderer>().bounds.size;
@@ -46,113 +65,123 @@ public class CombatManager : MonoBehaviour
         //var n_p = starttile.transform.position;
         //n_p.z = -3;
         Player.transform.position = starttile.transform.position;
-        Enemy.transform.position = tiles[14].transform.position;
+        //ENEMY POS
+        //Enemy.transform.position = tiles[14].transform.position;
+
         currentOpt = combatOptions.none;
         Debug.Log(currentOpt);
-        CheckIntersect(Player, starttile);
-
-       // mainCam.rect.width;
-        /*if(right == null && left == null)
-        {
-            right = (GameObject)Resources.Load("tile_right");
-            left = (GameObject)Resources.Load("tile_left");
-            reftile = (GameObject)Resources.Load("tile");
-        }*/
-
-        void GenFloor()
-        {
-            var cw = mainCam.rect.width;
-            var ch = mainCam.rect.height;
-            Debug.Log(mainCam.pixelWidth);
-            Debug.Log(mainCam.pixelHeight);
-            Debug.Log(ch);
-            var id = 0;
-            //Debug.Log(reftile.GetComponent<SpriteRenderer>().size);
-            for (int c = 0; c < cols; c++)
-            {
-                for (int r = 0; r < rows; r++)
-                {
-
-                    var tile = (GameObject)Instantiate(reftile, transform);
-                    var size = tile.GetComponent<SpriteRenderer>().size;
-                    var sprite = tile.GetComponent<SpriteRenderer>().sprite;
-                    
-                    
-
-                    float posX = (r * size.x) + cw;
-                    float posY = (c * -size.y) + ch;
-                    
-                    tile.transform.position = new v3(posX, posY, -2);
-                    var rot = tile.transform.rotation;
-                    
-                    //var d_c = cols - c;
-                    //float diff = (float)(d_r * d_c);
-                    if(r < 3)
-                    {
-                        
-
-                    }
-                    if (r >= 3)
-                    {
-                       // var d_r = r * 6;
-                        //var n_p = new v3(posX, posY, -2);
-                        //tile.transform.Translate(new v3(-1, 0, 0));
-                        //tile.transform.position = n_p;
-                        //tile.transform.Rotate(new v3(0f, 1f, 0), d_r);
-
-                        
-                    }
-                   /* if (c < 2)
-                    {
-                        var d_c = (cols - c) * 4;
-                        tile.transform.Rotate(new v3(1f, 0, 0), -d_c);
-                    }
-                    if (c >= 2)
-                    {
-                        var d_c = c * 4;
-                        tile.transform.Rotate(new v3(1f, 0, 0), d_c);
-                    }*/
-
-                    tile.name = id.ToString();
-                    id++;
+        CheckIntersectXY(Player.transform.position, starttile.transform.position);
+        playerTurn = true;
+        // mainCam.rect.width;
 
 
 
-                }
-                
-            }
-            
-        }
-        //GenFloor();
         //Destroy(reftile);
 
 
+        // Update is called once per frame
 
+        if (playerTurn == true)
+        {
+            Debug.Log(playerTurn);
+            elementmenu.SetActive(false);
+            movemenu.SetActive(false);
+            fleemenu.SetActive(false);
+        }
 
     }
-    bool playerTurn = true;
-    // Update is called once per frame
+
+    public void AttackOption()
+    {
+        Debug.Log("Attack");
+        //Instantiate(elementmenu);
+        elementmenu.SetActive(true);
+        combatmenu.SetActive(!combatmenu.activeSelf);
+        currentOpt = combatOptions.attack;
+    }
+
+    public void MoveOption()
+    {
+        Debug.Log("Move");
+        movemenu.SetActive(true);
+        combatmenu.SetActive(!combatmenu.activeSelf);
+        currentOpt = combatOptions.move;
+    }
+
+    public void FleeOption()
+    {
+        Debug.Log("Flee");
+        fleemenu.SetActive(true);
+        combatmenu.SetActive(!combatmenu.activeSelf);
+        currentOpt = combatOptions.flee;
+    }
+
+    public void Back()
+    {
+        Debug.Log("Back");
+        switch (currentOpt)
+        {
+            case combatOptions.move:
+                movemenu.SetActive(false);
+                combatmenu.SetActive(!combatmenu.activeSelf);
+                currentOpt = combatOptions.none;
+                break;
+            case combatOptions.attack:
+                elementmenu.SetActive(false);
+                combatmenu.SetActive(!combatmenu.activeSelf);
+                currentOpt = combatOptions.none;
+                break;
+            case combatOptions.flee:
+                fleemenu.SetActive(false);
+                combatmenu.SetActive(!combatmenu.activeSelf);
+                currentOpt = combatOptions.none;
+                break;
+            case combatOptions.none:
+                break;
+            default:
+                break;
+        }
+    }
+
     void Update()
     {
-        if (currentOpt == combatOptions.none)
+        if (playerTurn == true)
         {
+            switch (currentOpt)
+            {
+                case combatOptions.move:
+                    PlayerMove();
+                    break;
+                case combatOptions.attack:
+                    break;
+                case combatOptions.flee:
+                    break;
+                case combatOptions.none:
+                    break;
+                default:
+                    break;
+            }
 
-        }
-        if (playerTurn) 
-        {
-            PlayerMove();
+
         }
         else
         {
             EnemyMove();
         }
-    }
 
-    void PlayerMove() 
+    }
+    //GenFloor();
+    //Destroy(reftile);
+
+
+
+    
+
+    void PlayerMove()
     {
-        if (Input.GetKeyDown(KeyCode.W)) 
+        if (Input.GetKeyDown(KeyCode.W))
         {
-            if (currentPlayerTileIndex-tiles.Length/4>=0) 
+            if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
             {
                 currentPlayerTileIndex = currentPlayerTileIndex - tiles.Length / 4;
                 Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
@@ -161,7 +190,8 @@ public class CombatManager : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.A))
         {
-            if ((currentPlayerTileIndex+1)%7!=0) {
+            if ((currentPlayerTileIndex + 1) % 7 != 0)
+            {
                 currentPlayerTileIndex = currentPlayerTileIndex + 1;
                 Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
                 playerTurn = false;
@@ -182,28 +212,38 @@ public class CombatManager : MonoBehaviour
             {
                 currentPlayerTileIndex = currentPlayerTileIndex - 1;
                 Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                playerTurn = false;  
+                playerTurn = false;
             }
         }
     }
 
-    void EnemyMove() 
+
+
+
+
+    void EnemyMove()
     {
-        
+
     }
-    private bool CheckIntersect(GameObject obj1, GameObject obj2)
+
+
+    bool CheckIntersectXY(v3 p1, v3 p2)
+
     {
-        var p1 = obj1.transform.position;
-        var p2 = obj2.transform.position;
+
         var x = p1.x / p2.x;
         var y = p1.y / p2.y;
-        if(x > 0.5 || y > 0.5)
+        if (x > 0.5 || y > 0.5)
         {
             //Debug.Log(x);
             //Debug.Log(y);
             return true;
         }
-        
+
         return false;
     }
 }
+
+// Update is called once per frame
+
+
