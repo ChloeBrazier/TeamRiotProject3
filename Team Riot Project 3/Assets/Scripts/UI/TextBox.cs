@@ -15,6 +15,9 @@ public class TextBox : MonoBehaviour
     //child's next icon
     public Image nextIcon;
 
+    //parent script for interaction
+    public FlavorText parent;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -40,6 +43,7 @@ public class TextBox : MonoBehaviour
         if(textIndex == textboxContents.Count)
         {
             //TODO: make this resume game, probably using same/similar code as exiting encounters
+            parent.enabled = true;
             Destroy(this.gameObject);
             return;
         }
