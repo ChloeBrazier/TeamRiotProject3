@@ -8,36 +8,83 @@ using v3 = UnityEngine.Vector3;
 using v2 = UnityEngine.Vector2;
 using UnityEngine.Animations;
 using UnityEngine.UI;
-
-
+using System.Runtime.InteropServices;
 
 public class CombatManager : MonoBehaviour
 {
+    struct Entity
+    {
+        public v3 pos;
+        public GameObject self;
+        public GameObject current_tile;
+        public int health;
+        public Color e_color;
+        
+         
+        public Entity(GameObject obj)
+        {
+            self = obj;
+            pos = obj.transform.position;
+            health = -1;
+            current_tile = null;
+            e_color = Color.black;
+        }
+        public Entity(GameObject obj, int h)
+        {
+            self = obj;
+            pos = obj.transform.position;
+            health = h;
+            current_tile = null;
+            e_color = Color.black;
+        }
+        public Entity(GameObject obj, int h, GameObject t)
+        {
+            self = obj;
+            pos = obj.transform.position;
+            health = h;
+            current_tile = t;
+            
+            e_color = self.GetComponent<SpriteRenderer>().color;
+        }
+        public void SubtractHealth()
+        {
+            health--;
+        }
+        public void AddHealth()
+        {
+            health++;
+        }
+    }
     struct AttackProperties
     {
         public Color str;
         public Color weak;
+        public Color attackColor;
         public AttackProperties(Color s, Color w)
         {
             str = s;
             weak = w;
+            attackColor = Color.black;
         }
+        
     }
     // Start is called before the first frame update
     GameObject cam;
     GameObject right;
     GameObject left;
     Camera mainCam;
-   
+    Transform original = null;
     AttackProperties atk_prop;
     int rows = 6;
     int cols = 4;
+    int num_moves = 3;
     float tileSize = 1;
     public GameObject reftile;
     public GameObject Player;
     private int currentPlayerTileIndex;
     public GameObject floor;
     //public GameObject Enemy;
+    public GameObject Enemy;
     float move_width;
     float move_height;
     GameObject[] tiles;
@@ -54,11 +101,13 @@ public class CombatManager : MonoBehaviour
     bool a = false;
     bool s = false;
     bool d = false;
+    int num_enemies = 2;
     Color original_tile;
     bool playerTurn = false;
     int player_lvl = 0;
     float xp_nextlvl = 100.0f;
     v3 menu_pos;
+    List<Entity> Enemies;
     public enum combatOptions
     {
         move, attack, flee, none
@@ -72,15 +121,17 @@ public class CombatManager : MonoBehaviour
         cam = GameObject.FindGameObjectWithTag("MainCamera");
         mainCam = cam.GetComponent<Camera>();
         tiles = GameObject.FindGameObjectsWithTag("tile");
-
+        Enemies = new List<Entity>();
         GameObject starttile = tiles[0];
         currentPlayerTileIndex = 0;
         var spr_render = starttile.GetComponent<SpriteRenderer>().bounds.size;
         move_width = spr_render.x;
         move_height = spr_render.y;
-        //var n_p = starttile.transform.position;
-        //n_p.z = -3;
-        Player.transform.position = starttile.transform.position;
+        var n_p = starttile.transform.position;
+        n_p.y = -2;
+        Player.transform.position = n_p;
+
+        original_tile = starttile.GetComponent<SpriteRenderer>().color;
         //ENEMY POS
         //Enemy.transform.position = tiles[14].transform.position;
 
@@ -88,16 +139,16 @@ public class CombatManager : MonoBehaviour
         Debug.Log(currentOpt);
         CheckIntersectXY(Player.transform.position, starttile.transform.position);
         playerTurn = true;
-        // mainCam.rect.width;
 
-
-
-        //Destroy(reftile);
-
+        
         var enemies = GameObject.FindGameObjectsWithTag("enemy");
-        foreach (var enemy in enemies)
+        for(int i = 0; i < num_enemies; i++)
         {
-            
+            var tile_range = (int)UnityEngine.Random.Range(0, tiles.Length-1);
+            GameObject enemy = Instantiate(Enemy);
+            v3 e_p = tiles[tile_range].transform.position;
+            e_p.y = -2f;
+            enemy.transform.position = e_p;
             //enemy.transform.position = e_p;
             var rand = (int)UnityEngine.Random.Range(0, 5);
             var renderer = enemy.GetComponent<SpriteRenderer>();
@@ -105,6 +156,7 @@ public class CombatManager : MonoBehaviour
             {
                 case 0:
                     renderer.color = Color.green;
+                    Enemies.Add(new Entity(enemy, 3, tiles[tile_range]));
                     // renderer.color = new v3(.6f, .4f, .2f);
                     break;
                 case 1:
@@ -144,20 +196,29 @@ public class CombatManager : MonoBehaviour
         switch (obj.GetComponentInChildren<Text>().text)
         {
             case "Quake":
-                Debug.Log(atk_prop.weak);
-
+                
+               // Debug.Log("Enemy health: " + Enemies[0].health);
+                atk_prop.attackColor = Color.green;
                 break;
             case "Ember":
-                Debug.Log(atk_prop.weak);
+               
+               // Debug.Log("Enemy health: " + Enemies[0].health);
+                atk_prop.attackColor = Color.red;
                 break;
             case "Douse":
-                Debug.Log(atk_prop.weak);
+           
+               // Debug.Log("Enemy health: " + Enemies[0].health);
+                atk_prop.attackColor = Color.blue;
                 break;
             case "Bind":
-                Debug.Log(atk_prop.weak);
+              
+               // Debug.Log("Enemy health: " + Enemies[0].health);
+                atk_prop.attackColor = Color.Lerp(Color.yellow, Color.green, 0.75f);
                 break;
             case "Harden":
-                Debug.Log(atk_prop.weak);
+                
+               // Debug.Log("Enemy health: " + Enemies[0].health);
+                atk_prop.attackColor = Color.grey;
                 break;
             default:
                 break;
@@ -260,10 +321,13 @@ public class CombatManager : MonoBehaviour
         Debug.Log(attackmenu.activeSelf);
         if (moveselected)
         {
+            
             attackmenu.SetActive(true);
             movemenu.SetActive(false);
+            moveselected = false;
             return;
         }
+        
         if(attackmenu.activeSelf == true)
         {
             attackmenu.SetActive(false);
@@ -297,23 +361,64 @@ public class CombatManager : MonoBehaviour
 
     void Update()
     {
+        var n_p = Player.transform.position;
+        n_p.y = -2;
+        Player.transform.position = n_p;
+        int e_count = 0;
+        foreach (var enemy in Enemies)
+        {
+            e_count++;
+            if (playerTurn == false)
+            {
+                foreach (var tile in tiles)
+                {
+                    if (enemy.e_color == tile.GetComponent<SpriteRenderer>().color &&
+                        moveselected)
+                    {
+                        enemy.AddHealth();
+                    }
+                    if (enemy.e_color == tile.GetComponent<SpriteRenderer>().color &&
+                        moveselected)
+                    {
+                        enemy.SubtractHealth();
+                    }
+                }
+            }
+        }
+        
         if (playerTurn == true)
         {
             switch (currentOpt)
             {
                 case combatOptions.move:
+                    if(original == null)
+                    {
+                        original = Player.transform;
+                    }
                     PlayerMove();
                     break;
                 case combatOptions.attack:
-                    //Debug.Log("ATTACKING");
+                    
                     if (moveselected)
                     {
-                        AttackSpaceMove();
+                        AttackSpaceMove(atk_prop.attackColor);
+
                     }
+                    else
+                    {
+                        
+                        foreach (var item in tiles)
+                        {
+                            item.GetComponent<SpriteRenderer>().color = Color.white;
+                        }
+                    }
+                    
+                    
                     break;
                 case combatOptions.flee:
                     break;
                 case combatOptions.none:
+                        
                     break;
                 default:
                     break;
@@ -331,105 +436,126 @@ public class CombatManager : MonoBehaviour
     //Destroy(reftile);
 
 
-    void AttackSpaceMove()
+    void AttackSpaceMove(Color c)
     {
-        if (Input.GetKeyDown(KeyCode.W))
+        GameObject t;
+        if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
         {
-            if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
-            {
-                currentPlayerTileIndex = currentPlayerTileIndex - tiles.Length / 4;
-                GameObject t = tiles[currentPlayerTileIndex];
-                original_tile = t.GetComponent<SpriteRenderer>().color;
-                t.GetComponent<SpriteRenderer>().color = Color.yellow;
-                Debug.Log(t.name);
-                //Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                //playerTurn = false;
-            }
+            currentPlayerTileIndex = currentPlayerTileIndex - tiles.Length / 4;
+            t = tiles[currentPlayerTileIndex];
+            original_tile = t.GetComponent<SpriteRenderer>().color;
+            t.GetComponent<SpriteRenderer>().color = c;
+            //Debug.Log(t.name);
+            //Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+            //playerTurn = false;
+        }
+        
+        if ((currentPlayerTileIndex + 1) % 7 != 0)
+        {
+            currentPlayerTileIndex = currentPlayerTileIndex + 1;
+            t = tiles[currentPlayerTileIndex];
+            original_tile = t.GetComponent<SpriteRenderer>().color;
+            t.GetComponent<SpriteRenderer>().color = c;
+            //Debug.Log(t.name);
+            //Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+            //playerTurn = false;
+        }
+        
+        if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
+        {
+            currentPlayerTileIndex = currentPlayerTileIndex + tiles.Length / 4;
+            t = tiles[currentPlayerTileIndex];
+            original_tile = t.GetComponent<SpriteRenderer>().color;
+            t.GetComponent<SpriteRenderer>().color = c;
+
+            //Debug.Log(t.name);
+
+            // Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+            // playerTurn = false;
+        }
+        
+        if ((currentPlayerTileIndex) % 7 != 0)
+        {
+            currentPlayerTileIndex = currentPlayerTileIndex - 1;
+            t = tiles[currentPlayerTileIndex];
+            original_tile = t.GetComponent<SpriteRenderer>().color;
+            t.GetComponent<SpriteRenderer>().color = c;
+
+            //Debug.Log(t.name);
+            // Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+            // playerTurn = false;
+        }
+
+       /* if (Input.GetKeyDown(KeyCode.W))
+        {
+            
             
         }
         else if (Input.GetKeyDown(KeyCode.A))
         {
-            if ((currentPlayerTileIndex + 1) % 7 != 0)
-            {
-                currentPlayerTileIndex = currentPlayerTileIndex + 1;
-                GameObject t = tiles[currentPlayerTileIndex];
-                original_tile = t.GetComponent<SpriteRenderer>().color;
-                t.GetComponent<SpriteRenderer>().color = Color.yellow;
-                Debug.Log(t.name);
-                //Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                //playerTurn = false;
-            }
+            
         }
         else if (Input.GetKeyDown(KeyCode.S))
         {
-            if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
-            {
-                currentPlayerTileIndex = currentPlayerTileIndex + tiles.Length / 4;
-                GameObject t = tiles[currentPlayerTileIndex];
-                original_tile = t.GetComponent<SpriteRenderer>().color;
-                t.GetComponent<SpriteRenderer>().color = Color.yellow;
-                
-                Debug.Log(t.name);
-
-                // Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                // playerTurn = false;
-            }
+            
         }
         else if (Input.GetKeyDown(KeyCode.D))
         {
-            if ((currentPlayerTileIndex) % 7 != 0)
-            {
-                currentPlayerTileIndex = currentPlayerTileIndex - 1;
-                GameObject t = tiles[currentPlayerTileIndex];
-                original_tile = t.GetComponent<SpriteRenderer>().color;
-                t.GetComponent<SpriteRenderer>().color = Color.yellow;
-
-                Debug.Log(t.name);
-                // Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                // playerTurn = false;
-            }
-        }
+            
+        }*/
     }
 
 
     void PlayerMove()
     {
-        if (Input.GetKeyDown(KeyCode.W))
+
+        
+        if(num_moves <= 0)
+        {
+            currentOpt = combatOptions.none;
+        }
+
+        if (Input.GetKeyDown(KeyCode.W) && num_moves > 0)
         {
             if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
             {
                 currentPlayerTileIndex = currentPlayerTileIndex - tiles.Length / 4;
                 Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                playerTurn = false;
+                num_moves--;
+                //playerTurn = false;
             }
         }
-        else if (Input.GetKeyDown(KeyCode.A))
+        else if (Input.GetKeyDown(KeyCode.A) && num_moves > 0)
         {
             if ((currentPlayerTileIndex + 1) % 7 != 0)
             {
                 currentPlayerTileIndex = currentPlayerTileIndex + 1;
                 Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                playerTurn = false;
+                num_moves--;
+                //playerTurn = false;
             }
         }
-        else if (Input.GetKeyDown(KeyCode.S))
+        else if (Input.GetKeyDown(KeyCode.S) && num_moves > 0)
         {
             if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
             {
                 currentPlayerTileIndex = currentPlayerTileIndex + tiles.Length / 4;
                 Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                playerTurn = false;
+                num_moves--;
+                //playerTurn = false;
             }
         }
-        else if (Input.GetKeyDown(KeyCode.D))
+        else if (Input.GetKeyDown(KeyCode.D) && num_moves > 0)
         {
             if ((currentPlayerTileIndex) % 7 != 0)
             {
                 currentPlayerTileIndex = currentPlayerTileIndex - 1;
                 Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                playerTurn = false;
+                num_moves--;
+                //playerTurn = false;
             }
         }
+
     }
 
 
