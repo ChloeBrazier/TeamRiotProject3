@@ -510,11 +510,7 @@ public class CombatManager : MonoBehaviour
     {
 
         
-        if(num_moves <= 0)
-        {
-            currentOpt = combatOptions.none;
-        }
-
+      
         if (Input.GetKeyDown(KeyCode.W) && num_moves > 0)
         {
             if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
@@ -522,7 +518,7 @@ public class CombatManager : MonoBehaviour
                 currentPlayerTileIndex = currentPlayerTileIndex - tiles.Length / 4;
                 Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
                 num_moves--;
-                //playerTurn = false;
+                playerTurn = false;
             }
         }
         else if (Input.GetKeyDown(KeyCode.A) && num_moves > 0)
@@ -532,7 +528,7 @@ public class CombatManager : MonoBehaviour
                 currentPlayerTileIndex = currentPlayerTileIndex + 1;
                 Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
                 num_moves--;
-                //playerTurn = false;
+                playerTurn = false;
             }
         }
         else if (Input.GetKeyDown(KeyCode.S) && num_moves > 0)
@@ -542,7 +538,7 @@ public class CombatManager : MonoBehaviour
                 currentPlayerTileIndex = currentPlayerTileIndex + tiles.Length / 4;
                 Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
                 num_moves--;
-                //playerTurn = false;
+                playerTurn = false;
             }
         }
         else if (Input.GetKeyDown(KeyCode.D) && num_moves > 0)
@@ -552,7 +548,7 @@ public class CombatManager : MonoBehaviour
                 currentPlayerTileIndex = currentPlayerTileIndex - 1;
                 Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
                 num_moves--;
-                //playerTurn = false;
+                playerTurn = false;
             }
         }
 
