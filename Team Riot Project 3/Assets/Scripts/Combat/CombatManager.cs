@@ -19,7 +19,7 @@ public class CombatManager : MonoBehaviour
         public GameObject current_tile;
         public int health;
         public Color e_color;
-        
+        public int tileIndex;
          
         public Entity(GameObject obj)
         {
@@ -28,6 +28,7 @@ public class CombatManager : MonoBehaviour
             health = -1;
             current_tile = null;
             e_color = Color.black;
+            tileIndex = 0;
         }
         public Entity(GameObject obj, int h)
         {
@@ -36,13 +37,16 @@ public class CombatManager : MonoBehaviour
             health = h;
             current_tile = null;
             e_color = Color.black;
+            tileIndex = 0;
         }
-        public Entity(GameObject obj, int h, GameObject t)
+        //note added index since needed it for enemy movement
+        public Entity(GameObject obj, int h, GameObject t,int index)
         {
             self = obj;
             pos = obj.transform.position;
             health = h;
             current_tile = t;
+            tileIndex = index;
             
             e_color = self.GetComponent<SpriteRenderer>().color;
         }
@@ -149,6 +153,7 @@ public class CombatManager : MonoBehaviour
             v3 e_p = tiles[tile_range].transform.position;
             e_p.y = -2f;
             enemy.transform.position = e_p;
+            Enemies.Add(new Entity(enemy, 3, tiles[tile_range], tile_range));
             //enemy.transform.position = e_p;
             var rand = (int)UnityEngine.Random.Range(0, 5);
             var renderer = enemy.GetComponent<SpriteRenderer>();
@@ -156,7 +161,6 @@ public class CombatManager : MonoBehaviour
             {
                 case 0:
                     renderer.color = Color.green;
-                    Enemies.Add(new Entity(enemy, 3, tiles[tile_range]));
                     // renderer.color = new v3(.6f, .4f, .2f);
                     break;
                 case 1:
@@ -511,7 +515,7 @@ public class CombatManager : MonoBehaviour
 
         
       
-        if (Input.GetKeyDown(KeyCode.W) && num_moves > 0)
+        if (Input.GetKeyDown(KeyCode.S) && num_moves > 0)
         {
             if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
             {
@@ -531,7 +535,7 @@ public class CombatManager : MonoBehaviour
                 playerTurn = false;
             }
         }
-        else if (Input.GetKeyDown(KeyCode.S) && num_moves > 0)
+        else if (Input.GetKeyDown(KeyCode.W) && num_moves > 0)
         {
             if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
             {
@@ -557,10 +561,104 @@ public class CombatManager : MonoBehaviour
 
 
 
-
+    private enum EnemyMoveDir 
+    {
+        none,left,right,up,down,start
+    }
+    private int enemy_moves = 1;
     void EnemyMove()
     {
+        for(int i = 0; i < num_enemies; i++) 
+        {
+            Entity enemy = Enemies[i];//can't use for each throws error
+            EnemyMoveDir dir = EnemyMoveDir.start;
+            int movesLeft = enemy_moves;
 
+            while (movesLeft > 0 && dir != EnemyMoveDir.none)
+            {
+                //decide movement dir
+                //does NOT use tile calculations rather uses transforms of player and that enemy
+                if (enemy.self.transform.position.z<Player.transform.position.z)
+                {
+                    dir = EnemyMoveDir.up;
+                }
+                else if (enemy.self.transform.position.z > Player.transform.position.z)
+                {
+                    dir = EnemyMoveDir.down;
+                }
+                else if (enemy.self.transform.position.x > Player.transform.position.x)
+                {
+                    dir = EnemyMoveDir.left;
+                }
+                else if (enemy.self.transform.position.x < Player.transform.position.x)
+                {
+                    dir = EnemyMoveDir.right;
+                }
+                else 
+                {
+                    dir = EnemyMoveDir.none;//just in case lands on same spot
+                }
+
+
+                //go that direction
+                if (dir == EnemyMoveDir.down)
+                {
+                    if (enemy.tileIndex - tiles.Length / 4 >= 0)
+                    {
+                        if (currentPlayerTileIndex != enemy.tileIndex - tiles.Length / 4)
+                        {
+                            enemy.tileIndex = enemy.tileIndex - tiles.Length / 4;
+                            Debug.Log(enemy.tileIndex);
+                            enemy.self.transform.position = tiles[enemy.tileIndex].transform.position;
+                            movesLeft--;
+                        }
+                        else { dir = EnemyMoveDir.none; }
+                    }
+                }
+                else if (dir == EnemyMoveDir.left)
+                {
+                    if ((enemy.tileIndex + 1) % 7 != 0)
+                    {
+                        if (currentPlayerTileIndex != enemy.tileIndex + 1)
+                        {
+                            enemy.tileIndex = enemy.tileIndex + 1;
+                            Debug.Log(enemy.tileIndex);
+                            enemy.self.transform.position = tiles[enemy.tileIndex].transform.position;
+                            movesLeft--;
+                        }
+                        else { dir = EnemyMoveDir.none; }
+                    }
+                }
+                else if (dir == EnemyMoveDir.up)
+                {
+                    if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
+                    {
+                        if (currentPlayerTileIndex != enemy.tileIndex + tiles.Length / 4)
+                        {
+                            enemy.tileIndex = enemy.tileIndex + tiles.Length / 4;
+                            Debug.Log(enemy.tileIndex);
+                            enemy.self.transform.position = tiles[enemy.tileIndex].transform.position;
+                            movesLeft--;
+                        }
+                        else { dir = EnemyMoveDir.none; }
+                    }
+                }
+                else if (dir == EnemyMoveDir.right)
+                {
+                    if ((currentPlayerTileIndex) % 7 != 0)
+                    {
+                        if (currentPlayerTileIndex != enemy.tileIndex - 1)
+                        {
+                            enemy.tileIndex = enemy.tileIndex - 1;
+                            Debug.Log(enemy.tileIndex);
+                            enemy.self.transform.position = tiles[enemy.tileIndex].transform.position;
+                            movesLeft--;
+                        }
+                        else { dir = EnemyMoveDir.none; }
+                    }
+                }
+            }
+        }
     }
 
 
