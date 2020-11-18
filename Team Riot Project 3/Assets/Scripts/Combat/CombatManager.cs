@@ -81,7 +81,7 @@ public class CombatManager : MonoBehaviour
     AttackProperties atk_prop;
     int rows = 6;
     int cols = 4;
-    int num_moves = 3;
+    int num_moves = 3;//note must change value in loop as well
     float tileSize = 1;
     public GameObject reftile;
     public GameObject Player;
@@ -117,7 +117,7 @@ public class CombatManager : MonoBehaviour
         move, attack, flee, none
     }
 
-    combatOptions currentOpt;
+    combatOptions currentOpt;//player
 
     void Start()
     {
@@ -363,6 +363,11 @@ public class CombatManager : MonoBehaviour
         }
     }
 
+    private enum enemyTurnPhase 
+    {
+        move,attack
+    }
+    enemyTurnPhase enemyTurn;
     void Update()
     {
         var n_p = Player.transform.position;
@@ -432,7 +437,18 @@ public class CombatManager : MonoBehaviour
         }
         else
         {
-            EnemyMove();
+            if (enemyTurn==enemyTurnPhase.move)
+            {
+                EnemyMove();
+                enemyTurn = enemyTurnPhase.attack;
+            }
+            else if (enemyTurn == enemyTurnPhase.attack) 
+            {
+                EnemyAttack();
+                enemyTurn = enemyTurnPhase.move;
+                playerTurn = true;
+                num_moves = 3;
+            }
         }
 
     }
@@ -512,49 +528,46 @@ public class CombatManager : MonoBehaviour
 
     void PlayerMove()
     {
-
-        
-      
-        if (Input.GetKeyDown(KeyCode.S) && num_moves > 0)
+        if (num_moves > 0)
         {
-            if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
+            if (Input.GetKeyDown(KeyCode.S))
             {
-                currentPlayerTileIndex = currentPlayerTileIndex - tiles.Length / 4;
-                Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                num_moves--;
-                playerTurn = false;
+                if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
+                {
+                    currentPlayerTileIndex = currentPlayerTileIndex - tiles.Length / 4;
+                    Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                    num_moves--;
+                }
+            }
+            else if (Input.GetKeyDown(KeyCode.A))
+            {
+                if ((currentPlayerTileIndex + 1) % 7 != 0)
+                {
+                    currentPlayerTileIndex = currentPlayerTileIndex + 1;
+                    Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                    num_moves--;
+                }
+            }
+            else if (Input.GetKeyDown(KeyCode.W))
+            {
+                if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
+                {
+                    currentPlayerTileIndex = currentPlayerTileIndex + tiles.Length / 4;
+                    Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                    num_moves--;
+                }
+            }
+            else if (Input.GetKeyDown(KeyCode.D))
+            {
+                if ((currentPlayerTileIndex) % 7 != 0)
+                {
+                    currentPlayerTileIndex = currentPlayerTileIndex - 1;
+                    Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                    num_moves--;
+                }
             }
         }
-        else if (Input.GetKeyDown(KeyCode.A) && num_moves > 0)
-        {
-            if ((currentPlayerTileIndex + 1) % 7 != 0)
-            {
-                currentPlayerTileIndex = currentPlayerTileIndex + 1;
-                Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                num_moves--;
-                playerTurn = false;
-            }
-        }
-        else if (Input.GetKeyDown(KeyCode.W) && num_moves > 0)
-        {
-            if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
-            {
-                currentPlayerTileIndex = currentPlayerTileIndex + tiles.Length / 4;
-                Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                num_moves--;
-                playerTurn = false;
-            }
-        }
-        else if (Input.GetKeyDown(KeyCode.D) && num_moves > 0)
-        {
-            if ((currentPlayerTileIndex) % 7 != 0)
-            {
-                currentPlayerTileIndex = currentPlayerTileIndex - 1;
-                Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
-                num_moves--;
-                playerTurn = false;
-            }
-        }
+        else { playerTurn = false; }
 
     }
 
@@ -661,6 +674,12 @@ public class CombatManager : MonoBehaviour
         }
     }
 
+
+    void EnemyAttack() 
+    {
+
+
+    }
 
     bool CheckIntersectXY(v3 p1, v3 p2)
 
