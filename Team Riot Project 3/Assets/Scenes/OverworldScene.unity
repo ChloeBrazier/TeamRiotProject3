@@ -8661,7 +8661,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1033aa85a0c9b4f489ca07143dc6fe75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  toggleEncounters: 0
+  toggleEncounters: 1
 --- !u!61 &1235504645
 BoxCollider2D:
   m_ObjectHideFlags: 0
