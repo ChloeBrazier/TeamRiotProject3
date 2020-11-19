@@ -43,6 +43,8 @@ public class TextBox : MonoBehaviour
         if(textIndex == textboxContents.Count)
         {
             //TODO: make this resume game, probably using same/similar code as exiting encounters
+            Time.timeScale = 1;
+            playerMovement.instance.enabled = true;
             parent.enabled = true;
             Destroy(this.gameObject);
             return;

@@ -5,11 +5,23 @@ using UnityEngine.SceneManagement;
 
 public class playerMovement : MonoBehaviour
 {
+    public static playerMovement instance;
+
     private float step = 0.0f;
+
+    public bool toggleEncounters = true;
     // Start is called before the first frame update
     void Start()
     {
-        
+        //make singleton
+        if(instance != null)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            instance = this;
+        }
     }
 
     // Update is called once per frame
@@ -41,10 +53,13 @@ public class playerMovement : MonoBehaviour
         }
 
         // more than 20 step encounter a combat
-        if (step >= 20.0f)
+        if(toggleEncounters)
         {
-            step = 0.0f;
-            SceneManager.LoadScene(sceneName: "CombatScene");
+            if (step >= 20.0f)
+            {
+                step = 0.0f;
+                SceneManager.LoadScene(sceneName: "CombatScene");
+            }
         }
 
         if (Input.GetKey(KeyCode.Escape))
