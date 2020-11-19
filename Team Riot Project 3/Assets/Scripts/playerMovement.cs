@@ -58,13 +58,15 @@ public class playerMovement : MonoBehaviour
             if (step >= 20.0f)
             {
                 step = 0.0f;
-                SceneManager.LoadScene(sceneName: "CombatScene");
+                playerMovement.instance.enabled = false;
+                SceneManager.LoadScene("test-scene", LoadSceneMode.Additive);
             }
         }
 
-        if (Input.GetKey(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            SceneManager.LoadScene(sceneName: "CombatScene");
+            playerMovement.instance.enabled = false;
+            SceneManager.LoadScene("test-scene", LoadSceneMode.Additive);
         }
 
     }

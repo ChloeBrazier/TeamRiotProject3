@@ -15,9 +15,10 @@ public class sceneManager : MonoBehaviour
     void Update()
     {
         // go back to OverworldScene
-        if (Input.GetKey(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.P))
         {
-            SceneManager.LoadScene(sceneName: "OverworldScene");
+            playerMovement.instance.enabled = true;
+            Application.UnloadLevel("test-scene");
         }
     }
 }
