@@ -357,19 +357,20 @@ public class CombatManager : MonoBehaviour
                 break;
             case combatOptions.attack:
                 Debug.Log(currentOpt.ToString());
+                CheckEnemyDMG();
                 playerTurn = false;
 
                 break;
             case combatOptions.flee:
                 Debug.Log(currentOpt.ToString());
-                playerTurn = false;
+                //playerTurn = false;
                 break;
             case combatOptions.none:
                 break;
             default:
                 break;
         }
-        CheckEnemyDMG();
+        
     }
     public void Back()
     {
@@ -526,6 +527,7 @@ public class CombatManager : MonoBehaviour
                         Debug.Log(tile_e.SpaceBy());
                         enemy.SubtractHealth();
                         Debug.Log(enemy.health);
+                        
                     }
                 }
                 u++;
