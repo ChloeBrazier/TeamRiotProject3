@@ -102,6 +102,7 @@ public class CombatManager : MonoBehaviour
     int cols = 4;
     int num_moves = 3;//note must change value in loop as well
     float tileSize = 1;
+    
     public GameObject reftile;
     public GameObject Player;
     private int currentPlayerTileIndex;
@@ -125,6 +126,7 @@ public class CombatManager : MonoBehaviour
     bool s = false;
     bool d = false;
     int num_enemies = 2;
+    int originalidx = -1;
     Color original_tile;
     bool playerTurn = false;
     int player_lvl = 0;
@@ -137,9 +139,12 @@ public class CombatManager : MonoBehaviour
     {
         move, attack, flee, none
     }
-
+    public enum ElementAttacks
+    {
+        Quake, Ember, Douse, Bind, Harden, none
+    }
     combatOptions currentOpt;//player
-
+    ElementAttacks player_attacks;
     void Start()
     {
 
@@ -161,14 +166,17 @@ public class CombatManager : MonoBehaviour
         //Enemy.transform.position = tiles[14].transform.position;
 
         currentOpt = combatOptions.none;
+        
         Debug.Log(currentOpt);
         CheckIntersectXY(Player.transform.position, starttile.transform.position);
         playerTurn = true;
         Tiles_e = new List<Entity>();
+        int c = 0;
         foreach (var tile in tiles)
         {
+            tile.name = c.ToString();
             Tiles_e.Add(new Entity(tile));
-
+            c++;
         }
 
         var enemies = GameObject.FindGameObjectsWithTag("enemy");
@@ -214,6 +222,7 @@ public class CombatManager : MonoBehaviour
             movemenu.SetActive(false);
             fleemenu.SetActive(false);
             attackmenu.SetActive(false);
+            player_attacks = ElementAttacks.none;
         }
 
     }
@@ -231,26 +240,31 @@ public class CombatManager : MonoBehaviour
                 
                // Debug.Log("Enemy health: " + Enemies[0].health);
                 atk_prop.attackColor = Color.green;
+                player_attacks = ElementAttacks.Quake;
                 break;
             case "Ember":
                
                // Debug.Log("Enemy health: " + Enemies[0].health);
                 atk_prop.attackColor = Color.red;
+                player_attacks = ElementAttacks.Ember;
                 break;
             case "Douse":
            
                // Debug.Log("Enemy health: " + Enemies[0].health);
                 atk_prop.attackColor = Color.blue;
+                player_attacks = ElementAttacks.Douse;
                 break;
             case "Bind":
               
                // Debug.Log("Enemy health: " + Enemies[0].health);
                 atk_prop.attackColor = Color.Lerp(Color.yellow, Color.green, 0.75f);
+                player_attacks = ElementAttacks.Bind;
                 break;
             case "Harden":
                 
                // Debug.Log("Enemy health: " + Enemies[0].health);
                 atk_prop.attackColor = Color.grey;
+                player_attacks = ElementAttacks.Harden;
                 break;
             default:
                 break;
@@ -349,27 +363,31 @@ public class CombatManager : MonoBehaviour
     }
     public void Enter()
     {
-        switch (currentOpt)
+        if(currentOpt == combatOptions.move)
         {
-            case combatOptions.move:
-                Debug.Log(currentOpt.ToString());
-                playerTurn = false;
-                break;
-            case combatOptions.attack:
-                Debug.Log(currentOpt.ToString());
-                CheckEnemyDMG();
-                playerTurn = false;
-
-                break;
-            case combatOptions.flee:
-                Debug.Log(currentOpt.ToString());
-                //playerTurn = false;
-                break;
-            case combatOptions.none:
-                break;
-            default:
-                break;
+            playerTurn = false;
+            return;
         }
+        if (currentOpt == combatOptions.attack)
+        {
+            CheckEnemyDMG();
+            originalidx = -1;
+            playerTurn = false;
+            currentOpt = combatOptions.none;
+            //movemenu.SetActive(false);
+            return;
+        }
+        if (currentOpt == combatOptions.flee)
+        {
+            playerTurn = false;
+            return;
+        }
+        if (currentOpt == combatOptions.none)
+        {
+            playerTurn = false;
+            return;
+        } 
+        
         
     }
     public void Back()
@@ -385,7 +403,7 @@ public class CombatManager : MonoBehaviour
         }
         
         if(attackmenu.activeSelf == true)
-        {
+        { 
             attackmenu.SetActive(false);
             elementmenu.SetActive(!elementmenu.activeSelf);
             return;
@@ -425,27 +443,7 @@ public class CombatManager : MonoBehaviour
         var n_p = Player.transform.position;
         n_p.y = -2;
         Player.transform.position = n_p;
-        int e_count = 0;
-        foreach (var enemy in Enemies)
-        {
-            e_count++;
-            if (playerTurn == false)
-            {
-                foreach (var tile in tiles)
-                {
-                    if (enemy.e_color == tile.GetComponent<SpriteRenderer>().color &&
-                        moveselected)
-                    {
-                        enemy.AddHealth();
-                    }
-                    if (enemy.e_color == tile.GetComponent<SpriteRenderer>().color &&
-                        moveselected)
-                    {
-                        enemy.SubtractHealth();
-                    }
-                }
-            }
-        }
+        
         
         if (playerTurn == true)
         {
@@ -462,6 +460,10 @@ public class CombatManager : MonoBehaviour
                     
                     if (moveselected)
                     {
+                        if(originalidx == -1)
+                        {
+                            originalidx = currentPlayerTileIndex;
+                        }
                         AttackSpaceMove(atk_prop.attackColor);
 
                     }
@@ -499,7 +501,10 @@ public class CombatManager : MonoBehaviour
                 EnemyAttack();
                 enemyTurn = enemyTurnPhase.move;
                 playerTurn = true;
+                currentOpt = combatOptions.none;
                 num_moves = 3;
+                combatmenu.SetActive(true);
+                movemenu.SetActive(false);
             }
         }
 
@@ -511,80 +516,226 @@ public class CombatManager : MonoBehaviour
     {
         Debug.Log("Checking dmg");
 
-        for (var i = 0; i < Enemies.Count; i++)
+        if(playerTurn == true)
         {
-            var enemy = Enemies[i];
-            int u = 0;
-            foreach (var tile_e in Tiles_e)
+            for (var i = 0; i < Enemies.Count; i++)
             {
-                var tile = tile_e.self;
-
-                if (GameObject.ReferenceEquals(enemy.current_tile, tile_e.self))
+                var enemy = Enemies[i];
+                int u = 0;
+                foreach (var tile_e in Tiles_e)
                 {
+                    var tile = tile_e.self;
 
-                    if (tile_e.SpaceBy() == "Player")
+                    if (GameObject.ReferenceEquals(enemy.current_tile, tile_e.self))
                     {
-                        Debug.Log(tile_e.SpaceBy());
-                        enemy.SubtractHealth();
-                        Debug.Log(enemy.health);
-                        
+
+                        if (tile_e.SpaceBy() == "Player")
+                        {
+                            Debug.Log(tile_e.SpaceBy());
+                            enemy.SubtractHealth();
+                            Debug.Log(enemy.health);
+
+                        }
                     }
+                    u++;
                 }
-                u++;
+                //Debug.Log(enemy.SpaceBy());
+                //if()
+
+
+
             }
-            //Debug.Log(enemy.SpaceBy());
-            //if()
-
-
-
         }
     }
 
     void AttackSpaceMove(Color c)
     {
         GameObject t;
-        if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
+        int moveidx = currentPlayerTileIndex;
+        moveidx = currentPlayerTileIndex;
+        ResetTileColor();
+        if (Input.GetKeyDown(KeyCode.S))
         {
-            currentPlayerTileIndex = currentPlayerTileIndex - tiles.Length / 4;
-            t = tiles[currentPlayerTileIndex];
-            // original_tile = t.GetComponent<SpriteRenderer>().color;
-            Tiles_e[currentPlayerTileIndex].self.GetComponent<SpriteRenderer>().color = c;
+            if (currentPlayerTileIndex - 7 >= 0) //S
+            {
+                currentPlayerTileIndex = currentPlayerTileIndex - 7;
+                
 
-            Tiles_e[currentPlayerTileIndex] = new Entity(Tiles_e[currentPlayerTileIndex].self, currentPlayerTileIndex, "Player");
-
+            }
+            
         }
-        if ((currentPlayerTileIndex + 1) % 7 != 0)
+        else if (Input.GetKeyDown(KeyCode.W))
         {
-            currentPlayerTileIndex = currentPlayerTileIndex + 1;
-            t = tiles[currentPlayerTileIndex];
-            //original_tile = t.GetComponent<SpriteRenderer>().color;
-            Tiles_e[currentPlayerTileIndex].self.GetComponent<SpriteRenderer>().color = c;
-
-            Tiles_e[currentPlayerTileIndex] = new Entity(Tiles_e[currentPlayerTileIndex].self, currentPlayerTileIndex, "Player");
+            if (currentPlayerTileIndex + 7 <= tiles.Length) //N
+            {
+                currentPlayerTileIndex = currentPlayerTileIndex + 7;
+               
+            }
+            
         }
-        if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
+        else if (Input.GetKeyDown(KeyCode.D))
         {
-            currentPlayerTileIndex = currentPlayerTileIndex + tiles.Length / 4;
-            t = tiles[currentPlayerTileIndex];
-            //original_tile = t.GetComponent<SpriteRenderer>().color;
-            Tiles_e[currentPlayerTileIndex].self.GetComponent<SpriteRenderer>().color = c;
-
-            Tiles_e[currentPlayerTileIndex] = new Entity(Tiles_e[currentPlayerTileIndex].self, currentPlayerTileIndex, "Player");
+            if (currentPlayerTileIndex - 1 >= 0) //E
+            {
+                currentPlayerTileIndex = currentPlayerTileIndex - 1;
+              
+            }
+            
         }
-
-        if ((currentPlayerTileIndex) % 7 != 0)
+        else if (Input.GetKeyDown(KeyCode.A))
         {
-            currentPlayerTileIndex = currentPlayerTileIndex - 1;
-            t = tiles[currentPlayerTileIndex];
-            //original_tile = t.GetComponent<SpriteRenderer>().color;
-            Tiles_e[currentPlayerTileIndex].self.GetComponent<SpriteRenderer>().color = c;
-
-            Tiles_e[currentPlayerTileIndex] = new Entity(Tiles_e[currentPlayerTileIndex].self, currentPlayerTileIndex, "Player");
+            if (currentPlayerTileIndex + 1 <= tiles.Length) //W
+            {
+                currentPlayerTileIndex = currentPlayerTileIndex + 1;
+                
+            }
         }
+        Attack(c);
 
+
+
+        /* if ((currentPlayerTileIndex + 1) % 7 != 0)
+         {
+             currentPlayerTileIndex = currentPlayerTileIndex + 1;
+             t = tiles[currentPlayerTileIndex];
+             //original_tile = t.GetComponent<SpriteRenderer>().color;
+             Tiles_e[currentPlayerTileIndex].self.GetComponent<SpriteRenderer>().color = c;
+
+             Tiles_e[currentPlayerTileIndex] = new Entity(Tiles_e[currentPlayerTileIndex].self, currentPlayerTileIndex, "Player");
+         }
+         if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
+         {
+             currentPlayerTileIndex = currentPlayerTileIndex + tiles.Length / 4;
+             t = tiles[currentPlayerTileIndex];
+             //original_tile = t.GetComponent<SpriteRenderer>().color;
+             Tiles_e[currentPlayerTileIndex].self.GetComponent<SpriteRenderer>().color = c;
+
+             Tiles_e[currentPlayerTileIndex] = new Entity(Tiles_e[currentPlayerTileIndex].self, currentPlayerTileIndex, "Player");
+         }
+
+         if ((currentPlayerTileIndex) % 7 != 0)
+         {
+             currentPlayerTileIndex = currentPlayerTileIndex - 1;
+             t = tiles[currentPlayerTileIndex];
+             //original_tile = t.GetComponent<SpriteRenderer>().color;
+             Tiles_e[currentPlayerTileIndex].self.GetComponent<SpriteRenderer>().color = c;
+
+             Tiles_e[currentPlayerTileIndex] = new Entity(Tiles_e[currentPlayerTileIndex].self, currentPlayerTileIndex, "Player");
+         }*/
+        Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
 
     }
 
+    void Attack(Color c)
+    {
+        GameObject t;
+        int moveidx = currentPlayerTileIndex;
+        switch (player_attacks)
+        {
+            case ElementAttacks.Quake:
+                if (moveidx - 7 >= 0) //S
+                {
+                    moveidx = moveidx - 7;
+                    t = tiles[moveidx];
+                    // original_tile = t.GetComponent<SpriteRenderer>().color;
+                    Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
+
+                    moveidx = currentPlayerTileIndex;
+
+                }
+                if (moveidx + 7 <= tiles.Length) //N
+                {
+                    moveidx = moveidx + 7;
+                    t = tiles[moveidx];
+                    // original_tile = t.GetComponent<SpriteRenderer>().color;
+                    Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
+                    moveidx = currentPlayerTileIndex;
+                    // Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
+
+                }
+                if (moveidx - 1 >= 0) //E
+                {
+                    moveidx = moveidx - 1;
+                    t = tiles[moveidx];
+                    // original_tile = t.GetComponent<SpriteRenderer>().color;
+                    Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
+                    moveidx = currentPlayerTileIndex;
+                    //Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
+
+                }
+                if (moveidx + 1 <= tiles.Length) //W
+                {
+                    moveidx = moveidx + 1;
+                    t = tiles[moveidx];
+                    // original_tile = t.GetComponent<SpriteRenderer>().color;
+                    Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
+                    moveidx = currentPlayerTileIndex;
+                    //Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
+
+                }
+                break;
+            case ElementAttacks.Ember:
+                if (moveidx - 7 >= 0) //S
+                {
+                    moveidx = moveidx - 7;
+                    t = tiles[moveidx];
+                    // original_tile = t.GetComponent<SpriteRenderer>().color;
+                    Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
+
+                    moveidx = currentPlayerTileIndex;
+
+                }
+                if (moveidx + 7 <= tiles.Length) //N
+                {
+                    moveidx = moveidx + 7;
+                    t = tiles[moveidx];
+                    // original_tile = t.GetComponent<SpriteRenderer>().color;
+                    Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
+                    moveidx = currentPlayerTileIndex;
+                    // Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
+
+                }
+                if (moveidx - 1 >= 0) //E
+                {
+                    moveidx = moveidx - 1;
+                    t = tiles[moveidx];
+                    // original_tile = t.GetComponent<SpriteRenderer>().color;
+                    Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
+                    moveidx = currentPlayerTileIndex;
+                    //Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
+
+                }
+                if (moveidx + 1 <= tiles.Length) //W
+                {
+                    moveidx = moveidx + 1;
+                    t = tiles[moveidx];
+                    // original_tile = t.GetComponent<SpriteRenderer>().color;
+                    Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
+                    moveidx = currentPlayerTileIndex;
+                    //Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
+
+                }
+                break;
+            case ElementAttacks.Douse:
+                break;
+            case ElementAttacks.Bind:
+                break;
+            case ElementAttacks.Harden:
+                break;
+            case ElementAttacks.none:
+                break;
+            default:
+                break;
+        }
+    }
+
+    void ResetTileColor()
+    {
+        foreach (var item in Tiles_e)
+        {
+            item.self.GetComponent<SpriteRenderer>().color = original_tile;
+        }
+    }
 
     void PlayerMove()
     {
