@@ -102,7 +102,11 @@ public class CombatManager : MonoBehaviour
     int cols = 4;
     int num_moves = 3;//note must change value in loop as well
     float tileSize = 1;
-    
+
+    public HealthBar healthBar;
+    public int maxHealth = 100;
+    public int currentHealth;                             // health bar stuff
+
     public GameObject reftile;
     public GameObject Player;
     private int currentPlayerTileIndex;
@@ -152,6 +156,8 @@ public class CombatManager : MonoBehaviour
     Dir player_dir;
     void Start()
     {
+        currentHealth = maxHealth;
+        healthBar.SetMaxHealth(maxHealth);               // health bar stuff
 
         cam = GameObject.FindGameObjectWithTag("MainCamera");
         mainCam = cam.GetComponent<Camera>();
@@ -512,6 +518,27 @@ public class CombatManager : MonoBehaviour
                 combatmenu.SetActive(true);
                 movemenu.SetActive(false);
             }
+        }
+
+        // health bar stuff
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            currentHealth -= 10;
+            if (currentHealth <= 0)
+            {
+                currentHealth = 0;
+            }
+            healthBar.SetHealth(currentHealth);
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            currentHealth += 10;
+            if (currentHealth >= 100)
+            {
+                currentHealth = 100;
+            }
+            healthBar.SetHealth(currentHealth);
         }
 
     }
