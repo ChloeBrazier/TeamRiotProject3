@@ -5,6 +5,7 @@ using UnityEngine;
 public class Interact : MonoBehaviour
 {
     private bool interact = false;
+    private bool bossEncounter = false;
 
     private GameObject interactObject = null;
 
@@ -27,6 +28,14 @@ public class Interact : MonoBehaviour
         {
             interactObject.GetComponent<FlavorText>().ShowText();
             interact = false;
+        }
+
+        if(Input.GetKeyDown(KeyCode.Space) && bossEncounter == true)
+        {
+            //TODO: load boss fight scene
+            Debug.Log("encountered boss");
+
+            bossEncounter = false;
         }
 
         //move interaction box based on movement
@@ -59,6 +68,12 @@ public class Interact : MonoBehaviour
         {
             interactObject = collision.gameObject;
             interact = true;
+        }
+
+        //check if the colliding object is the boss
+        if(collision.gameObject.tag == "Boss")
+        {
+            bossEncounter = true;
         }
     }
 

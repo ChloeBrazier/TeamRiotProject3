@@ -3747,8 +3747,8 @@ GameObject:
   - component: {fileID: 248638792}
   - component: {fileID: 248638794}
   m_Layer: 0
-  m_Name: overworld_enemy
-  m_TagString: Untagged
+  m_Name: boss
+  m_TagString: Boss
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9255,6 +9255,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f80b4e36006647545ad1f979987d9c8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  healthBar: {fileID: 0}
+  maxHealth: 100
+  currentHealth: 0
   reftile: {fileID: 0}
   Player: {fileID: 0}
   floor: {fileID: 0}

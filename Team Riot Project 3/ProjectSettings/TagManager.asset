@@ -9,6 +9,7 @@ TagManager:
   - combatui
   - enemy
   - tile
+  - Boss
   layers:
   - Default
   - TransparentFX
