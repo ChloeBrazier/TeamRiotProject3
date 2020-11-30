@@ -11,7 +11,6 @@ public class FlavorText : MonoBehaviour
     //text box prefab
     public GameObject textPrefab;
 
-    //TODO: make a UI manager and add the canvas to it
     public GameObject canvas;
 
     // Start is called before the first frame update
@@ -35,7 +34,7 @@ public class FlavorText : MonoBehaviour
         itemText.GetComponent<TextBox>().enabled = true;
         this.enabled = false;
 
-        //set time scale to 0
+        //set time scale to 0 and disable player movement
         Time.timeScale = 0;
         playerMovement.instance.enabled = false;
     }

@@ -1856,6 +1856,72 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 397238a64dbe04943b9fe474447cd902, type: 3}
+--- !u!1 &1042338078
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1042338081}
+  - component: {fileID: 1042338080}
+  - component: {fileID: 1042338079}
+  m_Layer: 0
+  m_Name: TutorialManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1042338079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1042338078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1ee5385025bfaa4cb3d092253d6b76f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flavorText:
+  - Welcome to the underground world of monsters and magic! Allow us to walk you through
+    how to fight off these beasts.
+  - Select "Move" and then use the WASD keys to move around the combat grid. Select
+    "Attack" to use element magic against the enemies on the field.
+  - Different enemies are week to different elements. You must understand the elemental
+    interactions of Wuxing to deal more damage to your foes.
+  textPrefab: {fileID: 6126897466076228712, guid: a03ab73976cabe242acca3a53b454a9e,
+    type: 3}
+  canvas: {fileID: 1275882147}
+--- !u!114 &1042338080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1042338078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e14ede614990fa47904f71e75bf65be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1042338081
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1042338078}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.12099409, y: 0.8407684, z: -13.561679}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1213862767
 GameObject:
   m_ObjectHideFlags: 0
@@ -3294,7 +3360,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 7d8d4630ff336254ab657fda246384fc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 521c20445b92c584b9ee6ad9d93c7fd6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -3313,8 +3379,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1631063456}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -6.44}
-  m_LocalScale: {x: 0.28718, y: 0.28718, z: 0.28718}
+  m_LocalPosition: {x: 0.0088, y: 0.0353, z: -6.44}
+  m_LocalScale: {x: 1.3860879, y: 1.4049582, z: 0.28718}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
