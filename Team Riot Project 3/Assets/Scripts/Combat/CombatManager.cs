@@ -28,7 +28,7 @@ public class CombatManager : MonoBehaviour
             pos = obj.transform.position;
             health = -1;
             current_tile = null;
-            e_color = Color.black;
+            e_color = obj.GetComponent<SpriteRenderer>().color;
             tileIndex = 0;
             spaceby = null;
         }
@@ -38,7 +38,7 @@ public class CombatManager : MonoBehaviour
             pos = obj.transform.position;
             health = h;
             current_tile = null;
-            e_color = Color.black;
+            e_color = obj.GetComponent<SpriteRenderer>().color;
             tileIndex = 0;
             spaceby = null;
         }
@@ -52,7 +52,7 @@ public class CombatManager : MonoBehaviour
             tileIndex = index;
             spaceby = null;
 
-            e_color = self.GetComponent<SpriteRenderer>().color;
+            e_color = obj.GetComponent<SpriteRenderer>().color;
         }
         public Entity(GameObject obj, int index, string sp)
         {
@@ -83,6 +83,12 @@ public class CombatManager : MonoBehaviour
         public Color str;
         public Color weak;
         public Color attackColor;
+        public AttackProperties(Color c)
+        {
+            str = Color.black;
+            weak = Color.black;
+            attackColor = c;
+        }
         public AttackProperties(Color s, Color w)
         {
             str = s;
@@ -173,7 +179,7 @@ public class CombatManager : MonoBehaviour
         var n_p = starttile.transform.position;
         n_p.y = -2;
         Player.transform.position = n_p;
-
+        Debug.Log((Color)starttile.GetComponent<SpriteRenderer>().color);
         original_tile = starttile.GetComponent<SpriteRenderer>().color;
         //ENEMY POS
         //Enemy.transform.position = tiles[14].transform.position;
@@ -188,7 +194,7 @@ public class CombatManager : MonoBehaviour
         foreach (var tile in tiles)
         {
             tile.name = c.ToString();
-            Tiles_e.Add(new Entity(tile));
+            Tiles_e.Add(new Entity(tile, c, ""));
             c++;
         }
 
@@ -308,6 +314,7 @@ public class CombatManager : MonoBehaviour
                 var weak = Color.red;
                 var strong = Color.blue;
                 atk_prop = new AttackProperties(weak, strong);
+                atk_prop.attackColor = Color.green;
                 one.GetComponentInChildren<Text>().text = "Quake";
                 two.SetActive(false);
 
@@ -317,6 +324,7 @@ public class CombatManager : MonoBehaviour
                 weak = Color.blue;
                 strong = Color.red;
                 atk_prop = new AttackProperties(weak, strong);
+                atk_prop.attackColor = Color.red;
                 one.GetComponentInChildren<Text>().text = "Ember";
                 two.SetActive(false);
                 
@@ -326,6 +334,7 @@ public class CombatManager : MonoBehaviour
                 weak = Color.green;
                 strong = Color.red;
                 atk_prop = new AttackProperties(weak, strong);
+                atk_prop.attackColor = Color.blue;
                 one.GetComponentInChildren<Text>().text = "Douse";
                 two.SetActive(false);
                 
@@ -335,6 +344,7 @@ public class CombatManager : MonoBehaviour
                 weak = Color.grey;
                 strong = Color.green;
                 atk_prop = new AttackProperties(weak, strong);
+                atk_prop.attackColor = Color.Lerp(Color.yellow, Color.green, 0.75f);
                 one.GetComponentInChildren<Text>().text = "Bind";
                 two.SetActive(false);
                 
@@ -344,6 +354,7 @@ public class CombatManager : MonoBehaviour
                 weak = Color.red;
                 strong = Color.Lerp(Color.yellow, Color.green, 0.75f);
                 atk_prop = new AttackProperties(weak, strong);
+                atk_prop.attackColor = Color.grey;
                 one.GetComponentInChildren<Text>().text = "Harden";
                 two.SetActive(false);
                 
@@ -584,13 +595,7 @@ public class CombatManager : MonoBehaviour
                         if (enemy.health <= 0)
                         {
                             Debug.Log("ENEMY KILLED");
-                            /*  xp_currentlvl += 100.0f;
-                              if(xp_currentlvl == xp_nextlvl)
-                              {
-                                  player_lvl++;
-                                  Debug.Log("LEVEL UP");
-                                  xp_currentlvl = 0.0f;
-                              }*/
+                            
                         }
                     }
                 }
@@ -623,7 +628,7 @@ public class CombatManager : MonoBehaviour
             }
             
         }
-        else if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.W))
         {
             if (moveidx + 7 <= tiles.Length) //N
             {
@@ -635,7 +640,7 @@ public class CombatManager : MonoBehaviour
             }
             
         }
-        else if (Input.GetKeyDown(KeyCode.D))
+        if (Input.GetKeyDown(KeyCode.D))
         {
             if (moveidx - 1 >= 0) //E
             {
@@ -647,7 +652,7 @@ public class CombatManager : MonoBehaviour
             }
             
         }
-        else if (Input.GetKeyDown(KeyCode.A))
+        if (Input.GetKeyDown(KeyCode.A))
         {
             if (moveidx + 1 <= tiles.Length) //W
             {
@@ -657,6 +662,10 @@ public class CombatManager : MonoBehaviour
                 Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
 
             }
+        }
+        else
+        {
+            ResetTileColor();
         }
 
         switch (player_dir)
