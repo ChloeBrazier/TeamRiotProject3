@@ -544,6 +544,12 @@ MonoBehaviour:
   attackmenu: {fileID: 7351980620337677845}
   one: {fileID: 7351980620337677844}
   two: {fileID: 7351980620337677843}
+  elements:
+  - {fileID: 1505334070}
+  - {fileID: 1653246145}
+  - {fileID: 2083610037}
+  - {fileID: 464830744}
+  - {fileID: 994259501}
 --- !u!4 &258471634
 Transform:
   m_ObjectHideFlags: 0
@@ -2804,6 +2810,11 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Back
       objectReference: {fileID: 0}
+    - target: {fileID: 2299641527154961717, guid: 8b11d31c8f0b1ad42882d86d871f2529,
+        type: 3}
+      propertyPath: m_TagString
+      value: Untagged
+      objectReference: {fileID: 0}
     - target: {fileID: 2299641527230191578, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -2848,6 +2859,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Back
+      objectReference: {fileID: 0}
+    - target: {fileID: 2299641527349282676, guid: 8b11d31c8f0b1ad42882d86d871f2529,
+        type: 3}
+      propertyPath: m_TagString
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 2299641527349282677, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}

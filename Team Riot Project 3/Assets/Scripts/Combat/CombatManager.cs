@@ -124,6 +124,7 @@ public class CombatManager : MonoBehaviour
     public GameObject attackmenu;
     public GameObject one;
     public GameObject two;
+    public GameObject[] elements;
     bool moveselected = false;
     bool w = false;
     bool a = false;
@@ -134,6 +135,7 @@ public class CombatManager : MonoBehaviour
     Color original_tile;
     bool playerTurn = false;
     int player_lvl = 0;
+    float xp_currentlvl = 0.0f;
     float xp_nextlvl = 100.0f;
     v3 menu_pos;
     List<Entity> Enemies;
@@ -178,7 +180,7 @@ public class CombatManager : MonoBehaviour
 
         currentOpt = combatOptions.none;
         
-        Debug.Log(currentOpt);
+        //Debug.Log(currentOpt);
         CheckIntersectXY(Player.transform.position, starttile.transform.position);
         playerTurn = true;
         Tiles_e = new List<Entity>();
@@ -189,6 +191,8 @@ public class CombatManager : MonoBehaviour
             Tiles_e.Add(new Entity(tile));
             c++;
         }
+
+
 
         var enemies = GameObject.FindGameObjectsWithTag("enemy");
         for(int i = 0; i < num_enemies; i++)
@@ -228,7 +232,7 @@ public class CombatManager : MonoBehaviour
 
         if (playerTurn == true)
         {
-            Debug.Log(playerTurn);
+            //Debug.Log(playerTurn);
             elementmenu.SetActive(false);
             movemenu.SetActive(false);
             fleemenu.SetActive(false);
@@ -236,7 +240,12 @@ public class CombatManager : MonoBehaviour
             player_attacks = ElementAttacks.none;
             player_dir = Dir.down;
         }
-
+        
+        
+        foreach (var element in elements)
+        {
+            //Debug.Log(element.name);
+        }
     }
 
 
@@ -246,6 +255,9 @@ public class CombatManager : MonoBehaviour
         attackmenu.SetActive(false);
         movemenu.SetActive(true);
         moveselected = true;
+
+        ResetTileColor();
+
         switch (obj.GetComponentInChildren<Text>().text)
         {
             case "Quake":
@@ -292,55 +304,49 @@ public class CombatManager : MonoBehaviour
         switch (obj.name)
         {
             case "Earth":
+                ResetTileColor();
                 var weak = Color.red;
                 var strong = Color.blue;
                 atk_prop = new AttackProperties(weak, strong);
                 one.GetComponentInChildren<Text>().text = "Quake";
-                if(player_lvl < 1)
-                {
-                    two.SetActive(false);
-                }
+                two.SetActive(false);
 
                 break;
             case "Fire":
+                ResetTileColor();
                 weak = Color.blue;
                 strong = Color.red;
                 atk_prop = new AttackProperties(weak, strong);
                 one.GetComponentInChildren<Text>().text = "Ember";
-                if (player_lvl < 1)
-                {
-                    two.SetActive(false);
-                }
+                two.SetActive(false);
+                
                 break;
             case "Water":
+                ResetTileColor();
                 weak = Color.green;
                 strong = Color.red;
                 atk_prop = new AttackProperties(weak, strong);
                 one.GetComponentInChildren<Text>().text = "Douse";
-                if (player_lvl < 1)
-                {
-                    two.SetActive(false);
-                }
+                two.SetActive(false);
+                
                 break;
             case "Wood":
+                ResetTileColor();
                 weak = Color.grey;
                 strong = Color.green;
                 atk_prop = new AttackProperties(weak, strong);
                 one.GetComponentInChildren<Text>().text = "Bind";
-                if (player_lvl < 1)
-                {
-                    two.SetActive(false);
-                }
+                two.SetActive(false);
+                
                 break;
             case "Metal":
+                ResetTileColor();
                 weak = Color.red;
                 strong = Color.Lerp(Color.yellow, Color.green, 0.75f);
                 atk_prop = new AttackProperties(weak, strong);
                 one.GetComponentInChildren<Text>().text = "Harden";
-                if (player_lvl < 1)
-                {
-                    two.SetActive(false);
-                }
+                two.SetActive(false);
+                
                 break;
             default:
                 break;
@@ -351,7 +357,7 @@ public class CombatManager : MonoBehaviour
 
     public void AttackOption()
     {
-        Debug.Log("Attack");
+        //Debug.Log("Attack");
         //Instantiate(elementmenu);
         elementmenu.SetActive(true);
         combatmenu.SetActive(!combatmenu.activeSelf);
@@ -360,7 +366,7 @@ public class CombatManager : MonoBehaviour
 
     public void MoveOption()
     {
-        Debug.Log("Move");
+        //Debug.Log("Move");
         movemenu.SetActive(true);
         combatmenu.SetActive(!combatmenu.activeSelf);
         currentOpt = combatOptions.move;
@@ -455,8 +461,16 @@ public class CombatManager : MonoBehaviour
         var n_p = Player.transform.position;
         n_p.y = -2;
         Player.transform.position = n_p;
-        
-        
+
+        if (player_lvl <= 1)
+        {
+            elements[0].SetActive(true);
+            elements[1].SetActive(false);
+            elements[2].SetActive(false);
+            elements[3].SetActive(false);
+            elements[4].SetActive(false);
+        }
+
         if (playerTurn == true)
         {
             switch (currentOpt)
@@ -545,39 +559,48 @@ public class CombatManager : MonoBehaviour
     //GenFloor();
     //Destroy(reftile);
 
+
     void CheckEnemyDMG()
     {
         Debug.Log("Checking dmg");
 
-        if(playerTurn == true)
+        for (var i = 0; i < Enemies.Count; i++)
         {
-            for (var i = 0; i < Enemies.Count; i++)
+            var enemy = Enemies[i];
+            int u = 0;
+            foreach (var tile_e in Tiles_e)
             {
-                var enemy = Enemies[i];
-                int u = 0;
-                foreach (var tile_e in Tiles_e)
+                var tile = tile_e.self;
+
+                if (GameObject.ReferenceEquals(enemy.current_tile, tile_e.self))
                 {
-                    var tile = tile_e.self;
 
-                    if (GameObject.ReferenceEquals(enemy.current_tile, tile_e.self))
+                    if (tile_e.SpaceBy() == "Player")
                     {
-
-                        if (tile_e.SpaceBy() == "Player")
+                        Debug.Log(tile_e.SpaceBy());
+                        enemy.SubtractHealth();
+                        Debug.Log("ENEMY TAKING DMG");
+                        Debug.Log(enemy.health);
+                        if (enemy.health <= 0)
                         {
-                            Debug.Log(tile_e.SpaceBy());
-                            enemy.SubtractHealth();
-                            Debug.Log(enemy.health);
-
+                            Debug.Log("ENEMY KILLED");
+                            /*  xp_currentlvl += 100.0f;
+                              if(xp_currentlvl == xp_nextlvl)
+                              {
+                                  player_lvl++;
+                                  Debug.Log("LEVEL UP");
+                                  xp_currentlvl = 0.0f;
+                              }*/
                         }
                     }
-                    u++;
                 }
-                //Debug.Log(enemy.SpaceBy());
-                //if()
-
-
-
+                u++;
             }
+            //Debug.Log(enemy.SpaceBy());
+            //if()
+
+
+
         }
     }
 
@@ -701,22 +724,7 @@ public class CombatManager : MonoBehaviour
         //currentPlayerTileIndex = originalidx;
         var diff = moveidx - originalidx;
 
-        Debug.Log("DIFF: " + diff);
-        if (diff == 5)
-        {
-            //moveidx = moveidx + 2;
-            //diff = moveidx - originalidx;
-        }
-        if (diff == 6)
-        {
-            //moveidx++;
-            //diff = moveidx - originalidx;
-        }
-        if (diff == -8)
-        {
-            //moveidx++;
-            //diff = moveidx - originalidx;
-        }
+       
         switch (player_attacks)
             {   
             case ElementAttacks.Quake:
@@ -1100,7 +1108,7 @@ public class CombatManager : MonoBehaviour
                         if (currentPlayerTileIndex != enemy.tileIndex - tiles.Length / 4)
                         {
                             enemy.tileIndex = enemy.tileIndex - tiles.Length / 4;
-                            Debug.Log(enemy.tileIndex);
+                            //Debug.Log(enemy.tileIndex);
                             enemy.self.transform.position = tiles[enemy.tileIndex].transform.position;
                             movesLeft--;
                         }
@@ -1128,7 +1136,7 @@ public class CombatManager : MonoBehaviour
                         if (currentPlayerTileIndex != enemy.tileIndex + tiles.Length / 4)
                         {
                             enemy.tileIndex = enemy.tileIndex + tiles.Length / 4;
-                            Debug.Log(enemy.tileIndex);
+                            //Debug.Log(enemy.tileIndex);
                             enemy.self.transform.position = tiles[enemy.tileIndex].transform.position;
                             movesLeft--;
                         }
