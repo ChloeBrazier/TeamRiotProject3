@@ -153,7 +153,7 @@ public class CombatManager : MonoBehaviour
     List<int> enemyHealth;
     List<string> attackBy;
     List<Entity> Tiles_e;
-
+    private int updateInterval = 3;
     Entity Player_e;
     public enum combatOptions
     {
@@ -382,6 +382,7 @@ public class CombatManager : MonoBehaviour
 
     public void AttackOption()
     {
+
         //Debug.Log("Attack");
         //Instantiate(elementmenu);
         elementmenu.SetActive(true);
@@ -409,33 +410,38 @@ public class CombatManager : MonoBehaviour
         if(currentOpt == combatOptions.move)
         {
             playerTurn = false;
+            currentOpt = combatOptions.none;
+            player_attacks = ElementAttacks.none;
             return;
         }
         if (currentOpt == combatOptions.attack)
         {
-            CheckEnemyDMG();
+            //CheckEnemyDMG();
             originalidx = -1;
             playerTurn = false;
             currentOpt = combatOptions.none;
+            player_attacks = ElementAttacks.none;
             //movemenu.SetActive(false);
             return;
         }
         if (currentOpt == combatOptions.flee)
         {
             playerTurn = false;
+            currentOpt = combatOptions.none;
             return;
         }
         if (currentOpt == combatOptions.none)
         {
             playerTurn = false;
+            currentOpt = combatOptions.none;
             return;
-        } 
-        
+        }
+
         
     }
     public void Back()
     {
-        //Debug.Log(attackmenu.activeSelf);
+        //move menu
         if (moveselected)
         {
             
@@ -448,6 +454,12 @@ public class CombatManager : MonoBehaviour
         if(attackmenu.activeSelf == true)
         { 
             attackmenu.SetActive(false);
+            elementmenu.SetActive(!elementmenu.activeSelf);
+            return;
+        }
+        if (elementmenu.activeSelf == true)
+        {
+            attackmenu.SetActive(true);
             elementmenu.SetActive(!elementmenu.activeSelf);
             return;
         }
@@ -483,6 +495,8 @@ public class CombatManager : MonoBehaviour
     enemyTurnPhase enemyTurn;
     void Update()
     {
+        
+
         var n_p = Player.transform.position;
         n_p.y = -2;
         Player.transform.position = n_p;
@@ -537,6 +551,7 @@ public class CombatManager : MonoBehaviour
         }
         if (playerTurn == true)
         {
+            
             switch (currentOpt)
             {
                 case combatOptions.move:
@@ -557,14 +572,8 @@ public class CombatManager : MonoBehaviour
                         AttackSpaceMove(atk_prop.attackColor);
 
                     }
-                    else
-                    {
-                        
-                        foreach (var item in tiles)
-                        {
-                            item.GetComponent<SpriteRenderer>().color = Color.white;
-                        }
-                    }
+                    
+                    
                     
                     
                     break;
@@ -584,6 +593,7 @@ public class CombatManager : MonoBehaviour
             if (enemyTurn==enemyTurnPhase.move)
             {
                 EnemyMove();
+
                 enemyTurn = enemyTurnPhase.attack;
             }
             else if (enemyTurn == enemyTurnPhase.attack) 
@@ -595,6 +605,8 @@ public class CombatManager : MonoBehaviour
                 num_moves = 3;
                 combatmenu.SetActive(true);
                 movemenu.SetActive(false);
+                CheckEnemyDMG();
+                
             }
             
         }
@@ -609,7 +621,6 @@ public class CombatManager : MonoBehaviour
             }
             healthBar.SetHealth(currentHealth);
         }
-
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             currentHealth += 10;
@@ -619,22 +630,17 @@ public class CombatManager : MonoBehaviour
             }
             healthBar.SetHealth(currentHealth);
         }
-
     }
-    //GenFloor();
-    //Destroy(reftile);
-
 
     void CheckEnemyDMG()
     {
         Debug.Log("Checking dmg");
-
+        
         for (var i = 0; i < Enemies.Count; i++)
         {
             var enemy = Enemies[i];
-            int u = 0;
-            //Debug.Log(enemy.SpaceBy());
 
+            int u = 0;
             foreach (var tile_e in Tiles_e)
             {
                 var tile = tile_e.self;
@@ -654,7 +660,7 @@ public class CombatManager : MonoBehaviour
                         if (enemyHealth[i] <= 0)
                         {
                             Debug.Log("ENEMY KILLED");
-                            Destroy(Enemies[i].self);
+                            //Enemies[i].self.SetActive(false);
                             Enemies.RemoveAt(i);
                             
                             num_enemies--;
@@ -670,12 +676,9 @@ public class CombatManager : MonoBehaviour
                 }
                 u++;
             }
-            //Debug.Log(enemy.SpaceBy());
-            //if()
-
-
-
         }
+        
+
     }
 
     void AttackSpaceMove(Color c)
@@ -692,8 +695,7 @@ public class CombatManager : MonoBehaviour
                 ResetTileColor();
                 moveidx = currentPlayerTileIndex - 7;
                 player_dir = Dir.down;
-                //Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
-
+                
             }
             
         }
@@ -704,7 +706,7 @@ public class CombatManager : MonoBehaviour
                 ResetTileColor();
                 moveidx = currentPlayerTileIndex + 7;
                 player_dir = Dir.up;
-                //Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
+                
 
             }
             
@@ -716,7 +718,7 @@ public class CombatManager : MonoBehaviour
                 ResetTileColor();
                 moveidx = currentPlayerTileIndex - 1;
                 player_dir = Dir.right;
-               // Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
+
 
             }
             
@@ -728,7 +730,7 @@ public class CombatManager : MonoBehaviour
                 ResetTileColor();
                 moveidx = currentPlayerTileIndex + 1;
                 player_dir = Dir.left;
-                //Tiles_e[moveidx] = new Entity(Tiles_e[moveidx].self, moveidx, "Player");
+                
 
             }
         }
@@ -823,7 +825,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx + 1];
                         Tiles_e[moveidx + 1] = new Entity(t, moveidx + 1, "Player");
                         Tiles_e[moveidx + 1].self.GetComponent<SpriteRenderer>().color = c;
-                        
+                        attackBy[moveidx + 1] = "Player";
                     }
                     if (moveidx + 2 <= tiles.Length) //W
                     {
@@ -832,7 +834,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx + 2] = new Entity(t, moveidx + 2, "Player");
                         Tiles_e[moveidx + 2].self.GetComponent<SpriteRenderer>().color = c;
                         moveidx = currentPlayerTileIndex;
-                        
+                        attackBy[moveidx + 2] = "Player";
                     }
                     
                 }
@@ -844,7 +846,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx];
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
-                        
+                        attackBy[moveidx] = "Player";
                     }
                     if (moveidx - 1 >= 0) 
                     {
@@ -852,7 +854,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx - 1];
                         Tiles_e[moveidx - 1] = new Entity(t, moveidx - 1, "Player");
                         Tiles_e[moveidx - 1].self.GetComponent<SpriteRenderer>().color = c;
-                  
+                        attackBy[moveidx - 1] = "Player";
                     }
 
                 }
@@ -865,7 +867,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx];
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
-                        
+                        attackBy[moveidx] = "Player";
 
                     }
                     if (moveidx + 7 <= tiles.Length) //W
@@ -874,7 +876,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx + 7];
                         Tiles_e[moveidx + 7] = new Entity(t, moveidx + 7, "Player");
                         Tiles_e[moveidx + 7].self.GetComponent<SpriteRenderer>().color = c;
-                        
+                        attackBy[moveidx + 7] = "Player";
                     }
 
                 }
@@ -886,7 +888,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx];
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
-                        
+                        attackBy[moveidx] = "Player";
                     }
                     if (moveidx - 7 >= 0)
                     {
@@ -894,7 +896,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx - 7];
                         Tiles_e[moveidx - 7] = new Entity(t, moveidx - 7, "Player");
                         Tiles_e[moveidx - 7].self.GetComponent<SpriteRenderer>().color = c;
-                        
+                        attackBy[moveidx - 7] = "Player";
                     }
 
                 }
@@ -911,7 +913,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx + 1];
                         Tiles_e[moveidx + 1] = new Entity(t, moveidx + 1, "Player");
                         Tiles_e[moveidx + 1].self.GetComponent<SpriteRenderer>().color = c;
-                       
+                        attackBy[moveidx + 1] = "Player";
 
                     }
                     if (moveidx + 2 <= tiles.Length) //W
@@ -920,7 +922,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx + 2];
                         Tiles_e[moveidx + 2] = new Entity(t, moveidx + 2, "Player");
                         Tiles_e[moveidx + 2].self.GetComponent<SpriteRenderer>().color = c;
-                       
+                        attackBy[moveidx + 2] = "Player";
                         moveidx += 2;
                         if (moveidx + 7 <= tiles.Length)
                         {
@@ -928,7 +930,7 @@ public class CombatManager : MonoBehaviour
                             t = tiles[moveidx + 7];
                             Tiles_e[moveidx + 7] = new Entity(t, moveidx + 7, "Player");
                             Tiles_e[moveidx + 7].self.GetComponent<SpriteRenderer>().color = c;
-                            
+                            attackBy[moveidx + 7] = "Player";
 
                         }
                         if (moveidx - 7 <= tiles.Length)
@@ -937,7 +939,7 @@ public class CombatManager : MonoBehaviour
                             t = tiles[moveidx - 7];
                             Tiles_e[moveidx - 7] = new Entity(t, moveidx - 7, "Player");
                             Tiles_e[moveidx - 7].self.GetComponent<SpriteRenderer>().color = c;
-                         
+                            attackBy[moveidx - 7] = "Player";
 
                         }
                     }
@@ -954,7 +956,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx];
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
-                        
+                        attackBy[moveidx] = "Player";
                     }
                     if (moveidx - 1 >= 0)
                     {
@@ -962,7 +964,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx - 1];
                         Tiles_e[moveidx - 1] = new Entity(t, moveidx - 1, "Player");
                         Tiles_e[moveidx - 1].self.GetComponent<SpriteRenderer>().color = c;
-                        
+                        attackBy[moveidx - 1] = "Player";
                         moveidx -= 1;
                         if (moveidx + 7 <= tiles.Length)
                         {
@@ -970,7 +972,7 @@ public class CombatManager : MonoBehaviour
                             t = tiles[moveidx + 7];
                             Tiles_e[moveidx + 7] = new Entity(t, moveidx + 7, "Player");
                             Tiles_e[moveidx + 7].self.GetComponent<SpriteRenderer>().color = c;
-                            
+                            attackBy[moveidx + 7] = "Player";
 
                         }
                         if (moveidx - 7 <= tiles.Length)
@@ -979,7 +981,7 @@ public class CombatManager : MonoBehaviour
                             t = tiles[moveidx - 7];
                             Tiles_e[moveidx - 7] = new Entity(t, moveidx - 7, "Player");
                             Tiles_e[moveidx - 7].self.GetComponent<SpriteRenderer>().color = c;
-                            
+                            attackBy[moveidx - 7] = "Player";
 
                         }
                     }
@@ -994,7 +996,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx];
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
-                       
+                        attackBy[moveidx] = "Player";
 
                     }
                     if (moveidx + 7 <= tiles.Length) 
@@ -1003,7 +1005,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx + 7];
                         Tiles_e[moveidx + 7] = new Entity(t, moveidx + 7, "Player");
                         Tiles_e[moveidx + 7].self.GetComponent<SpriteRenderer>().color = c;
-                        
+                        attackBy[moveidx + 7] = "Player";
                         moveidx += 7;
                         if (moveidx + 1 <= tiles.Length)
                         {
@@ -1011,7 +1013,7 @@ public class CombatManager : MonoBehaviour
                             t = tiles[moveidx + 1];
                             Tiles_e[moveidx + 1] = new Entity(t, moveidx + 1, "Player");
                             Tiles_e[moveidx + 1].self.GetComponent<SpriteRenderer>().color = c;
-                            
+                            attackBy[moveidx + 1] = "Player";
 
                         }
                         if (moveidx - 1 <= tiles.Length)
@@ -1020,7 +1022,7 @@ public class CombatManager : MonoBehaviour
                             t = tiles[moveidx - 1];
                             Tiles_e[moveidx - 1] = new Entity(t, moveidx - 1, "Player");
                             Tiles_e[moveidx - 1].self.GetComponent<SpriteRenderer>().color = c;
-                       
+                            attackBy[moveidx - 1] = "Player";
 
                         }
                     }
@@ -1034,7 +1036,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx];
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
-                        
+                        attackBy[moveidx] = "Player";
                     }
                     if (moveidx - 7 >= 0)
                     {
@@ -1042,7 +1044,7 @@ public class CombatManager : MonoBehaviour
                         t = tiles[moveidx - 7];
                         Tiles_e[moveidx - 7] = new Entity(t, moveidx - 7, "Player");
                         Tiles_e[moveidx - 7].self.GetComponent<SpriteRenderer>().color = c;
-                        
+                        attackBy[moveidx - 7] = "Player";
                         moveidx -= 7;
                         if (moveidx + 1 <= tiles.Length)
                         {
@@ -1050,7 +1052,7 @@ public class CombatManager : MonoBehaviour
                             t = tiles[moveidx + 1];
                             Tiles_e[moveidx + 1] = new Entity(t, moveidx + 1, "Player");
                             Tiles_e[moveidx + 1].self.GetComponent<SpriteRenderer>().color = c;
-                            
+                            attackBy[moveidx + 1] = "Player";
 
                         }
                         if (moveidx - 1 <= tiles.Length)
@@ -1059,7 +1061,7 @@ public class CombatManager : MonoBehaviour
                             t = tiles[moveidx - 1];
                             Tiles_e[moveidx - 1] = new Entity(t, moveidx - 1, "Player");
                             Tiles_e[moveidx - 1].self.GetComponent<SpriteRenderer>().color = c;
-                         
+                            attackBy[moveidx - 1] = "Player";
 
                         }
                     }
@@ -1072,7 +1074,7 @@ public class CombatManager : MonoBehaviour
                 t = tiles[currentPlayerTileIndex];
                 Tiles_e[currentPlayerTileIndex] = new Entity(t, currentPlayerTileIndex, "Player");
                 Tiles_e[currentPlayerTileIndex].self.GetComponent<SpriteRenderer>().color = c;
-             
+                attackBy[currentPlayerTileIndex] = "Player";
                 break;
             case ElementAttacks.none:
                 break;
@@ -1086,14 +1088,32 @@ public class CombatManager : MonoBehaviour
 
     void ResetTileColor()
     {
+      
         foreach (var item in Tiles_e)
         {
+            
             item.self.GetComponent<SpriteRenderer>().color = original_tile;
+            
+            
+        }
+    }
+    void ResetTileSpace()
+    {
+        int u = 0;
+        foreach (var item in Tiles_e)
+        {
+            attackBy[u] = "empty";
+            
+            u++;
+
         }
     }
 
     void PlayerMove()
     {
+        if(playerTurn == false)
+            return;
+
         if (num_moves > 0)
         {
             if (Input.GetKeyDown(KeyCode.S))
@@ -1152,8 +1172,8 @@ public class CombatManager : MonoBehaviour
             Entity enemy = Enemies[i];//can't use for each throws error
             EnemyMoveDir dir = EnemyMoveDir.start;
             int movesLeft = enemy_moves;
-
-            while (movesLeft > 0 && dir != EnemyMoveDir.none)
+            
+            while (movesLeft > 0 && dir != EnemyMoveDir.none && enemy.self != null)
             {
                 //decide movement dir
                 //does NOT use tile calculations rather uses transforms of player and that enemy
@@ -1189,6 +1209,7 @@ public class CombatManager : MonoBehaviour
                             enemy.tileIndex = enemy.tileIndex - tiles.Length / 4;
                             //Debug.Log(enemy.tileIndex);
                             enemy.self.transform.position = tiles[enemy.tileIndex].transform.position;
+                            Enemies[i] = new Entity(enemy.self, enemy.health, tiles[enemy.tileIndex], enemy.tileIndex);
                             movesLeft--;
                         }
                         else { dir = EnemyMoveDir.none; }
@@ -1203,6 +1224,7 @@ public class CombatManager : MonoBehaviour
                             enemy.tileIndex = enemy.tileIndex + 1;
                             //Debug.Log(enemy.tileIndex);
                             enemy.self.transform.position = tiles[enemy.tileIndex].transform.position;
+                            Enemies[i] = new Entity(enemy.self, enemy.health, tiles[enemy.tileIndex], enemy.tileIndex);
                             movesLeft--;
                         }
                         else { dir = EnemyMoveDir.none; }
@@ -1217,6 +1239,7 @@ public class CombatManager : MonoBehaviour
                             enemy.tileIndex = enemy.tileIndex + tiles.Length / 4;
                             //Debug.Log(enemy.tileIndex);
                             enemy.self.transform.position = tiles[enemy.tileIndex].transform.position;
+                            Enemies[i] = new Entity(enemy.self, enemy.health, tiles[enemy.tileIndex], enemy.tileIndex);
                             movesLeft--;
                         }
                         else { dir = EnemyMoveDir.none; }
@@ -1231,15 +1254,20 @@ public class CombatManager : MonoBehaviour
                             enemy.tileIndex = enemy.tileIndex - 1;
                             //Debug.Log(enemy.tileIndex);
                             enemy.self.transform.position = tiles[enemy.tileIndex].transform.position;
+                            Enemies[i] = new Entity(enemy.self, enemy.health, tiles[enemy.tileIndex], enemy.tileIndex);
                             movesLeft--;
                         }
                         else { dir = EnemyMoveDir.none; }
                     }
                 }
             }
-            v3 e_p = enemy.self.transform.position;
-            e_p.y = -2f;
-            enemy.self.transform.position = e_p;
+            if(enemy.self != null)
+            {
+                v3 e_p = enemy.self.transform.position;
+                e_p.y = -2f;
+                enemy.self.transform.position = e_p;
+            }
+            
         }
     }
 
@@ -1261,7 +1289,7 @@ public class CombatManager : MonoBehaviour
                 }
             }
             GameObject t;
-            if (tileidx - tiles.Length / 4 >= 0)
+           /* if (tileidx - tiles.Length / 4 >= 0)
             {
                 tileidx = tileidx - tiles.Length / 4;
                 t = tiles[tileidx];
@@ -1279,7 +1307,7 @@ public class CombatManager : MonoBehaviour
                         Debug.Log("Player Taking DMG: " + currentHealth);
                     }
                 }
-            }
+            }*/
             if ((tileidx + 1) % 7 != 0)
             {
                 tileidx = tileidx + 1;
@@ -1288,10 +1316,11 @@ public class CombatManager : MonoBehaviour
                 Tiles_e[tileidx].self.GetComponent<SpriteRenderer>().color = Enemies[u].self.GetComponent<SpriteRenderer>().color;
 
                 Tiles_e[tileidx] = new Entity(Tiles_e[tileidx].self, tileidx, "Enemy");
+                attackBy[tileidx] = "Enemy";
                 if (GameObject.ReferenceEquals(Player_e.current_tile, Tiles_e[tileidx].self))
                 {
 
-                    if (Tiles_e[tileidx].SpaceBy() == "Enemy")
+                    if (attackBy[tileidx] == "Enemy")
                     {
                         Debug.Log(Player_e.SpaceBy());
                         Player_e.SubtractHealth();
@@ -1307,10 +1336,11 @@ public class CombatManager : MonoBehaviour
                 Tiles_e[tileidx].self.GetComponent<SpriteRenderer>().color = Enemies[u].self.GetComponent<SpriteRenderer>().color;
 
                 Tiles_e[tileidx] = new Entity(Tiles_e[tileidx].self, tileidx, "Enemy");
+                attackBy[tileidx] = "Enemy";
                 if (GameObject.ReferenceEquals(Player_e.current_tile, Tiles_e[tileidx].self))
                 {
 
-                    if (Tiles_e[tileidx].SpaceBy() == "Enemy")
+                    if (attackBy[tileidx] == "Enemy")
                     {
                         Debug.Log(Player_e.SpaceBy());
                         Player_e.SubtractHealth();
@@ -1327,10 +1357,11 @@ public class CombatManager : MonoBehaviour
                 Tiles_e[tileidx].self.GetComponent<SpriteRenderer>().color = Enemies[u].self.GetComponent<SpriteRenderer>().color;
 
                 Tiles_e[tileidx] = new Entity(Tiles_e[tileidx].self, tileidx, "Enemy");
+                attackBy[tileidx] = "Enemy";
                 if (GameObject.ReferenceEquals(Player_e.current_tile, Tiles_e[tileidx].self))
                 {
 
-                    if (Tiles_e[tileidx].SpaceBy() == "Enemy")
+                    if (attackBy[tileidx] == "Enemy")
                     {
                         Debug.Log(Player_e.SpaceBy());
                         Player_e.SubtractHealth();
