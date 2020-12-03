@@ -636,48 +636,60 @@ public class CombatManager : MonoBehaviour
     {
         Debug.Log("Checking dmg");
         
-        for (var i = 0; i < Enemies.Count; i++)
+        var delete = -1;
+        List<Entity> Enemy_e = Enemies;
+        for(var i = 0; i < Enemies.Count; i++)
         {
+
             var enemy = Enemies[i];
-
-            int u = 0;
-            foreach (var tile_e in Tiles_e)
+            
+            if(enemy.self != null)
             {
-                var tile = tile_e.self;
-                
-                if (GameObject.ReferenceEquals(enemy.current_tile, tile_e.self))
+                int u = 0;
+                foreach (var tile_e in Tiles_e)
                 {
+                    var tile = tile_e.self;
 
-                    if (attackBy[u] == "Player")
+                    if (GameObject.ReferenceEquals(enemy.current_tile, tile_e.self))
                     {
-                        
-                        var health = enemy.health;
-                        health--;
-                        Enemies[i] = new Entity(enemy.self, health, tile_e.self, u);
-                        enemyHealth[i]--;
-                        Debug.Log("ENEMY TAKING DMG: " + i);
-                        Debug.Log(enemyHealth[i]);
-                        if (enemyHealth[i] <= 0)
+
+                        if (attackBy[u] == "Player")
                         {
-                            Debug.Log("ENEMY KILLED");
-                            //Enemies[i].self.SetActive(false);
-                            Enemies.RemoveAt(i);
+
                             
-                            num_enemies--;
-                            xp_currentlvl += 105.0f;
-                            Debug.Log("XP Gain: " + xp_currentlvl);
-                            if(xp_currentlvl >= xp_nextlvl)
+                            
+                            enemyHealth[i]--;
+                            
+                            Debug.Log("ENEMY TAKING DMG: " + i);
+                            Debug.Log(enemyHealth[i]);
+                            if (enemyHealth[i] == 0)
                             {
-                                player_lvl++;
-                                xp_currentlvl = 0.0f;
+                                delete = i;                
+                                xp_currentlvl += 105.0f;
+                                Debug.Log("XP Gain: " + xp_currentlvl);
+                                if (xp_currentlvl >= xp_nextlvl)
+                                {
+                                    player_lvl++;
+                                    xp_currentlvl = 0.0f;
+                                }
+
                             }
                         }
                     }
+                    u++;
                 }
-                u++;
             }
         }
-        
+        if(delete != -1)
+        {
+            Debug.Log("ENEMY KILLED");
+            Destroy(Enemies[delete].self);
+            enemyHealth.RemoveAt(delete);
+            Enemies.RemoveAt(delete);
+            num_enemies--;
+
+        }
+
 
     }
 
@@ -1279,6 +1291,11 @@ public class CombatManager : MonoBehaviour
         int eidx = 0;
         for (int u = 0; u < Enemies.Count; u++)
         {
+            if(Enemies[u].self == null)
+            {
+                continue;
+            }
+
             int tileidx = 0;
             for (int i = 0; i < tiles.Length; i++)
             {
