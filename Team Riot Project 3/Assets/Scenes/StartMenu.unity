@@ -408,27 +408,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: '
-
-    Team:
-
-
-    Taurian Graham - Mechanics Lead
-
-
-    Ethan Shea - Design Lead
-
-
-    Qijun He - Artist
-
-
-    Eddie Brazier - Production Manager
-
-
-    Resources Used:
-
-
-    [YOUR SOURCES HERE]'
+  m_Text: "\nTeam:\n\nTaurian Graham - Mechanics Lead\n\nEthan Shea - Design Lead\n\nQijun
+    He - Artist\n\nEddie Brazier - Production Manager\n\nResources Used:\nhttps://freesound.org/people/HarDuKK/sounds/412053/\r\n\r\nhttps://freesound.org/people/SoundFlakes/sounds/493508/\r\n\r\nhttps://freesound.org/people/BloodPixel/sounds/510995/\r\n\r\nhttps://freesound.org/people/Sirkoto51/sounds/352171/\r\n\r\nhttps://www.zapsplat.com/music/single-footstep-flip-flop-on-thin-plywood-2/\n[YOUR
+    SOURCES HERE]"
 --- !u!222 &193826804
 CanvasRenderer:
   m_ObjectHideFlags: 0
