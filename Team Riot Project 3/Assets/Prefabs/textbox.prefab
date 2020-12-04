@@ -245,4 +245,6 @@ MonoBehaviour:
   - Here's the first page
   - Here's the second page
   - Here's the third and final page!
+  impact: {fileID: 8300000, guid: 8c6637450972cfd438e9d66077425808, type: 3}
   nextIcon: {fileID: 6126897465739715413}
+  parent: {fileID: 0}

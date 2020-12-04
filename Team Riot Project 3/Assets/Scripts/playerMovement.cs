@@ -7,6 +7,11 @@ public class playerMovement : MonoBehaviour
 {
     public static playerMovement instance;
 
+    public AudioClip impact;
+    AudioSource audioSource;
+    public float time;
+
+
     //movement sprites
     private SpriteRenderer sprite;
     public List<Sprite> movementSprites;
@@ -18,8 +23,10 @@ public class playerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+
         //make singleton
-        if(instance != null)
+        if (instance != null)
         {
             Destroy(this);
         }
@@ -35,12 +42,18 @@ public class playerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        time += Time.deltaTime;
+        
         // WASD to control movement
         if (Input.GetKey(KeyCode.W))
         {
             transform.position += Vector3.up * 0.1f;
             step+=0.1f;
-
+            if (time >= 0.25f)
+            {
+                audioSource.PlayOneShot(impact, 0.7F);
+                time = 0;
+            }
             sprite.sprite = movementSprites[2];
         }
         
@@ -48,7 +61,11 @@ public class playerMovement : MonoBehaviour
         {
             transform.position -= Vector3.up * 0.1f;
             step += 0.1f;
-
+            if (time >= 0.25f)
+            {
+                audioSource.PlayOneShot(impact, 0.7F);
+                time = 0;
+            }
             sprite.sprite = movementSprites[1];
         }
         
@@ -56,7 +73,11 @@ public class playerMovement : MonoBehaviour
         {
             transform.position -= Vector3.right * 0.1f;
             step += 0.1f;
-
+            if (time >= 0.25f)
+            {
+                audioSource.PlayOneShot(impact, 0.7F);
+                time = 0;
+            }
             sprite.sprite = movementSprites[0];
             sprite.flipX = true;
         }
@@ -65,14 +86,18 @@ public class playerMovement : MonoBehaviour
         {
             transform.position += Vector3.right * 0.1f;
             step += 0.1f;
-
+            if (time >= 0.25f)
+            {
+                audioSource.PlayOneShot(impact, 0.7F);
+                time = 0;
+            }
             sprite.sprite = movementSprites[0];
             sprite.flipX = false;
         }
 
         // more than 20 step encounter a combat
 
-        Debug.Log(step);
+        // Debug.Log(step);
 
         if (step >= 20.0f)
         {

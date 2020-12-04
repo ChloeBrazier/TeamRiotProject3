@@ -8762,6 +8762,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1033aa85a0c9b4f489ca07143dc6fe75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  impact: {fileID: 8300000, guid: 848816a1eb5356e4f8daae7ea5dcdea2, type: 3}
+  time: 0
   movementSprites:
   - {fileID: 4154667061567573633, guid: bcda0680b270f524f9a5a608a7424d2e, type: 3}
   - {fileID: 307022013455192112, guid: bcda0680b270f524f9a5a608a7424d2e, type: 3}
@@ -9453,6 +9455,11 @@ PrefabInstance:
       propertyPath: canvas
       value: 
       objectReference: {fileID: 1897928495}
+    - target: {fileID: 714565702295734573, guid: df96ada143acd8d4cbce79ae2f391274,
+        type: 3}
+      propertyPath: impact
+      value: 
+      objectReference: {fileID: 8300000, guid: 8c6637450972cfd438e9d66077425808, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: df96ada143acd8d4cbce79ae2f391274, type: 3}
 --- !u!1001 &2342890673752060097
@@ -9464,9 +9471,24 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2342890673482457798, guid: f43ba8872c652124fbbf5346d9cf95e0,
         type: 3}
+      propertyPath: flavorText.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2342890673482457798, guid: f43ba8872c652124fbbf5346d9cf95e0,
+        type: 3}
       propertyPath: canvas
       value: 
       objectReference: {fileID: 1897928495}
+    - target: {fileID: 2342890673482457798, guid: f43ba8872c652124fbbf5346d9cf95e0,
+        type: 3}
+      propertyPath: impact
+      value: 
+      objectReference: {fileID: 8300000, guid: 8c6637450972cfd438e9d66077425808, type: 3}
+    - target: {fileID: 2342890673482457798, guid: f43ba8872c652124fbbf5346d9cf95e0,
+        type: 3}
+      propertyPath: flavorText.Array.data[0]
+      value: Hi, it is just a note
+      objectReference: {fileID: 0}
     - target: {fileID: 2342890673482457799, guid: f43ba8872c652124fbbf5346d9cf95e0,
         type: 3}
       propertyPath: m_Name
