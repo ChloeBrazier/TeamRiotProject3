@@ -5,10 +5,11 @@ using UnityEngine.SceneManagement;
 
 public class sceneManager : MonoBehaviour
 {
+    public GameObject player;
     // Start is called before the first frame update
     void Start()
     {
-        
+        player = GameObject.FindGameObjectWithTag("audio");
     }
 
     // Update is called once per frame
@@ -18,6 +19,7 @@ public class sceneManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P))
         {
             playerMovement.instance.enabled = true;
+            player.GetComponent<AudioSource>().Play();
             Application.UnloadLevel("test-scene");
         }
     }

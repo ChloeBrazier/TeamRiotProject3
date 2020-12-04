@@ -14,6 +14,7 @@ public class playerMovement : MonoBehaviour
     private float step = 0.0f;
 
     public bool toggleEncounters = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -71,18 +72,21 @@ public class playerMovement : MonoBehaviour
 
         // more than 20 step encounter a combat
 
-        // if(toggleEncounters)
-        // {
-            if (step >= 20.0f)
-            {
-                step = 0.0f;
-                playerMovement.instance.enabled = false;
-                SceneManager.LoadScene("test-scene", LoadSceneMode.Additive);
-            }
-        // }
+        Debug.Log(step);
+
+        if (step >= 20.0f)
+        {
+            GetComponent<AudioSource>().Stop();
+            step = 0.0f;
+            playerMovement.instance.enabled = false;
+            SceneManager.LoadScene("test-scene", LoadSceneMode.Additive);
+        }
+
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            GetComponent<AudioSource>().Stop();
+            step = 0.0f;
             playerMovement.instance.enabled = false;
             SceneManager.LoadScene("test-scene", LoadSceneMode.Additive);
         }

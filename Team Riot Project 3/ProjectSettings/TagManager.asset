@@ -10,6 +10,12 @@ TagManager:
   - enemy
   - tile
   - Boss
+  - menu
+  - element
+  - flee
+  - move
+  - attack
+  - audio
   layers:
   - Default
   - TransparentFX
