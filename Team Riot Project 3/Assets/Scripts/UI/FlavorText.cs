@@ -27,6 +27,7 @@ public class FlavorText : MonoBehaviour
 
     public void ShowText()
     {
+        GetComponent<AudioSource>().Play();
         //spawn text box
         GameObject itemText = Instantiate(textPrefab, canvas.transform);
         itemText.GetComponent<TextBox>().parent = this;
