@@ -1502,6 +1502,7 @@ public class CombatManager : MonoBehaviour
         if (currentHealth <= 0)
         {
             Player_e.self.SetActive(false);
+            SceneManager.LoadScene("EndScene");
         }
         else if (currentHealth > 0)
         {
