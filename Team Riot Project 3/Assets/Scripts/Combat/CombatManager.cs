@@ -1121,19 +1121,25 @@ public class CombatManager : MonoBehaviour
         }
     }
 
+    bool moving = false;
     void PlayerMove()
     {
         if(playerTurn == false)
             return;
-
-        if (num_moves > 0)
+        if(moving)
         {
+            StartCoroutine(Movement(currentPlayerTileIndex,Player));
+        }
+        else if (num_moves > 0)
+        {
+          
+
             if (Input.GetKeyDown(KeyCode.S))
             {
                 if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex - tiles.Length / 4;
-                    Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                    moving = true;
                     num_moves--;
                 }
             }
@@ -1142,7 +1148,7 @@ public class CombatManager : MonoBehaviour
                 if ((currentPlayerTileIndex + 1) % 7 != 0)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex + 1;
-                    Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                    moving = true;
                     num_moves--;
                 }
             }
@@ -1151,7 +1157,7 @@ public class CombatManager : MonoBehaviour
                 if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex + tiles.Length / 4;
-                    Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                    moving = true;
                     num_moves--;
                 }
             }
@@ -1160,16 +1166,30 @@ public class CombatManager : MonoBehaviour
                 if ((currentPlayerTileIndex) % 7 != 0)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex - 1;
-                    Player.transform.position = tiles[currentPlayerTileIndex].transform.position;
+                    moving = true;
                     num_moves--;
                 }
             }
+            
         }
         else { playerTurn = false; }
 
     }
 
-
+    IEnumerator Movement(int index,GameObject entity) 
+    {
+        if (tiles[index].transform.position != entity.transform.position)
+        {
+            entity.transform.position = Vector3.Lerp(entity.transform.position, tiles[index].transform.position, 1f);
+            if ((entity.transform.position - tiles[index].transform.position).magnitude <= 0.5f)
+            {
+                entity.transform.position = tiles[index].transform.position;
+                moving = false;
+            }
+        }
+        Debug.Log((entity.transform.position - tiles[index].transform.position).magnitude);
+        yield return null;
+    }
 
 
     private enum EnemyMoveDir 
@@ -1187,6 +1207,7 @@ public class CombatManager : MonoBehaviour
             
             while (movesLeft > 0 && dir != EnemyMoveDir.none && enemy.self != null)
             {
+
                 //decide movement dir
                 //does NOT use tile calculations rather uses transforms of player and that enemy
                 if (enemy.self.transform.position.z<Player.transform.position.z)
@@ -1287,26 +1308,132 @@ public class CombatManager : MonoBehaviour
     void EnemyAttack()
     {
 
-        // Debug.Log("Enemey Attacking");
+        // Debug.Log("Enemy Attacking");
         int eidx = 0;
         for (int u = 0; u < Enemies.Count; u++)
         {
-            if(Enemies[u].self == null)
+            Entity enemy = Enemies[u];
+            //goal find the rough player pos in order to execute an attack
+            //does this by figuring out if player is above, below, left or right
+            //then executing an attack in that range
+            //uses two EnemyMoveDir(reused from enemy move) values to get exact dir(only one doesn't get diagnols)
+            EnemyMoveDir dirUpDown = EnemyMoveDir.start;
+            if (enemy.self.transform.position.z < Player.transform.position.z)
+            {
+                dirUpDown = EnemyMoveDir.up;
+            }
+            else if (enemy.self.transform.position.z > Player.transform.position.z)
+            {
+                dirUpDown = EnemyMoveDir.down;
+            }
+            else 
+            {
+                dirUpDown = EnemyMoveDir.none;
+            }
+
+            EnemyMoveDir dirLeftRight = EnemyMoveDir.start;
+            if (enemy.self.transform.position.x > Player.transform.position.x)
+            {
+                dirLeftRight = EnemyMoveDir.left;
+            }
+            else if (enemy.self.transform.position.x < Player.transform.position.x)
+            {
+                dirLeftRight = EnemyMoveDir.right;
+            }
+            else
+            {
+                dirLeftRight = EnemyMoveDir.none;//just in case lands on same spot
+            }
+
+            if (Enemies[u].self == null)
             {
                 continue;
             }
 
-            int tileidx = 0;
-            for (int i = 0; i < tiles.Length; i++)
-            {
-                if (GameObject.ReferenceEquals(tiles[i], Enemies[u].current_tile))
-                {
-                    tileidx = i;
 
+            //dirUPDown/////////////////////////////////////////////////////////////////////////////////////
+            if (dirUpDown == EnemyMoveDir.down)//right must be valid since player is down
+            {
+                //no check for down since player must already be below enemy(assuming other code is good)
+                int tileIndex= enemy.tileIndex - tiles.Length / 4;
+                tileCheck(tileIndex,enemy);
+            }
+            else if (dirUpDown == EnemyMoveDir.up)//right must be valid since player is to left
+            {
+                //no check for down since player must already be above enemy(assuming other code is good)
+                int tileIndex = enemy.tileIndex + tiles.Length / 4;
+                tileCheck(tileIndex, enemy);
+            }
+            else if (dirUpDown == EnemyMoveDir.none) {
+                //do the check since don't know// always default to down first
+                if (enemy.tileIndex - tiles.Length / 4 >= 0)
+                {
+                    int tileIndex = enemy.tileIndex - tiles.Length / 4;
+                    dirUpDown = EnemyMoveDir.down;
+                    tileCheck(tileIndex, enemy);
+                }
+                else //if down doesn't work up must
+                {
+                    int tileIndex = enemy.tileIndex + tiles.Length / 4;
+                    dirUpDown = EnemyMoveDir.up;
+                    tileCheck(tileIndex, enemy);
                 }
             }
-            GameObject t;
-           /* if (tileidx - tiles.Length / 4 >= 0)
+
+            //dirLeftRight/////////////////////////////////////////////////////////////////////////////////////
+            if (dirLeftRight == EnemyMoveDir.left)//right must be valid since player is down
+            {
+                //no check for down since player must already be below enemy(assuming other code is good)
+                int tileIndex = enemy.tileIndex +1;
+                tileCheck(tileIndex, enemy);
+            }
+            else if (dirLeftRight == EnemyMoveDir.right)//right must be valid since player is to left
+            {
+                //no check for down since player must already be above enemy(assuming other code is good)
+                int tileIndex = enemy.tileIndex -1 ;
+                tileCheck(tileIndex, enemy);
+            }
+            else if (dirLeftRight == EnemyMoveDir.none)
+            {
+                //do the check since don't know// always default to left first
+                if ((enemy.tileIndex + 1) % 7 != 0)
+                {
+                    int tileIndex = enemy.tileIndex +1;
+                    dirLeftRight = EnemyMoveDir.left;
+                    tileCheck(tileIndex, enemy);
+                }
+                else //if down doesn't work right must
+                {
+                    int tileIndex = enemy.tileIndex-1;
+                    dirLeftRight = EnemyMoveDir.right;
+                    tileCheck(tileIndex, enemy);
+                }
+            }
+
+            //diagnols//////////////////////////////////////////////////////////////////(check both)
+            if(dirUpDown==EnemyMoveDir.down&&dirLeftRight== EnemyMoveDir.left) {
+                //no check since both directions must be valid do to previous calc.
+                int tileIndex = enemy.tileIndex - tiles.Length / 4 +1;
+                tileCheck(tileIndex, enemy);
+            }
+            else if (dirUpDown == EnemyMoveDir.down && dirLeftRight == EnemyMoveDir.right) 
+            {
+                //no check since both directions must be valid
+                int tileIndex = enemy.tileIndex - tiles.Length / 4 - 1;
+                tileCheck(tileIndex, enemy);
+            }
+            else if (dirUpDown == EnemyMoveDir.up && dirLeftRight == EnemyMoveDir.left)
+            {
+                int tileIndex = enemy.tileIndex + tiles.Length / 4+1;
+                tileCheck(tileIndex, enemy);
+            }
+            else if (dirUpDown == EnemyMoveDir.up && dirLeftRight == EnemyMoveDir.right)
+            {
+                int tileIndex = enemy.tileIndex + tiles.Length / 4 - 1;
+                tileCheck(tileIndex, enemy);
+            }
+
+            /* if (tileidx - tiles.Length / 4 >= 0)
             {
                 tileidx = tileidx - tiles.Length / 4;
                 t = tiles[tileidx];
@@ -1324,74 +1451,87 @@ public class CombatManager : MonoBehaviour
                         Debug.Log("Player Taking DMG: " + currentHealth);
                     }
                 }
-            }*/
-            if ((tileidx + 1) % 7 != 0)
-            {
-                tileidx = tileidx + 1;
-                t = tiles[tileidx];
-                //original_tile = t.GetComponent<SpriteRenderer>().color;
-                Tiles_e[tileidx].self.GetComponent<SpriteRenderer>().color = Enemies[u].self.GetComponent<SpriteRenderer>().color;
+            }*///same square as enemy
+               /*
+               if ((tileidx + 1) % 7 != 0)
+               {
+                   tileidx = tileidx + 1;
+                   t = tiles[tileidx];
+                   //original_tile = t.GetComponent<SpriteRenderer>().color;
+                   Tiles_e[tileidx].self.GetComponent<SpriteRenderer>().color = Enemies[u].self.GetComponent<SpriteRenderer>().color;
 
-                Tiles_e[tileidx] = new Entity(Tiles_e[tileidx].self, tileidx, "Enemy");
-                attackBy[tileidx] = "Enemy";
-                if (GameObject.ReferenceEquals(Player_e.current_tile, Tiles_e[tileidx].self))
-                {
+                   Tiles_e[tileidx] = new Entity(Tiles_e[tileidx].self, tileidx, "Enemy");
+                   attackBy[tileidx] = "Enemy";
+                   if (GameObject.ReferenceEquals(Player_e.current_tile, Tiles_e[tileidx].self))
+                   {
 
-                    if (attackBy[tileidx] == "Enemy")
-                    {
-                        Debug.Log(Player_e.SpaceBy());
-                        Player_e.SubtractHealth();
-                        Debug.Log(Player_e.health);
-                    }
-                }
-            }
-            if (tileidx + tiles.Length / 4 <= tiles.Length)
-            {
-                tileidx = tileidx + tiles.Length / 4;
-                t = tiles[tileidx];
-                //original_tile = t.GetComponent<SpriteRenderer>().color;
-                Tiles_e[tileidx].self.GetComponent<SpriteRenderer>().color = Enemies[u].self.GetComponent<SpriteRenderer>().color;
+                       if (attackBy[tileidx] == "Enemy")
+                       {
+                           Debug.Log(Player_e.SpaceBy());
+                           Player_e.SubtractHealth();
+                           Debug.Log(Player_e.health);
+                       }
+                   }
+               }
+               if (tileidx + tiles.Length / 4 <= tiles.Length)
+               {
+                   tileidx = tileidx + tiles.Length / 4;
+                   t = tiles[tileidx];
+                   //original_tile = t.GetComponent<SpriteRenderer>().color;
+                   Tiles_e[tileidx].self.GetComponent<SpriteRenderer>().color = Enemies[u].self.GetComponent<SpriteRenderer>().color;
 
-                Tiles_e[tileidx] = new Entity(Tiles_e[tileidx].self, tileidx, "Enemy");
-                attackBy[tileidx] = "Enemy";
-                if (GameObject.ReferenceEquals(Player_e.current_tile, Tiles_e[tileidx].self))
-                {
+                   Tiles_e[tileidx] = new Entity(Tiles_e[tileidx].self, tileidx, "Enemy");
+                   attackBy[tileidx] = "Enemy";
+                   if (GameObject.ReferenceEquals(Player_e.current_tile, Tiles_e[tileidx].self))
+                   {
 
-                    if (attackBy[tileidx] == "Enemy")
-                    {
-                        Debug.Log(Player_e.SpaceBy());
-                        Player_e.SubtractHealth();
-                        Debug.Log(Player_e.health);
-                    }
-                }
-            }
+                       if (attackBy[tileidx] == "Enemy")
+                       {
+                           Debug.Log(Player_e.SpaceBy());
+                           Player_e.SubtractHealth();
+                           Debug.Log(Player_e.health);
+                       }
+                   }
+               }
 
-            if ((tileidx) % 7 != 0)
-            {
-                tileidx = tileidx - 1;
-                t = tiles[tileidx];
-                //original_tile = t.GetComponent<SpriteRenderer>().color;
-                Tiles_e[tileidx].self.GetComponent<SpriteRenderer>().color = Enemies[u].self.GetComponent<SpriteRenderer>().color;
+               if ((tileidx) % 7 != 0)
+               {
+                   tileidx = tileidx - 1;
+                   t = tiles[tileidx];
+                   //original_tile = t.GetComponent<SpriteRenderer>().color;
+                   Tiles_e[tileidx].self.GetComponent<SpriteRenderer>().color = Enemies[u].self.GetComponent<SpriteRenderer>().color;
 
-                Tiles_e[tileidx] = new Entity(Tiles_e[tileidx].self, tileidx, "Enemy");
-                attackBy[tileidx] = "Enemy";
-                if (GameObject.ReferenceEquals(Player_e.current_tile, Tiles_e[tileidx].self))
-                {
+                   Tiles_e[tileidx] = new Entity(Tiles_e[tileidx].self, tileidx, "Enemy");
+                   attackBy[tileidx] = "Enemy";
+                   if (GameObject.ReferenceEquals(Player_e.current_tile, Tiles_e[tileidx].self))
+                   {
 
-                    if (attackBy[tileidx] == "Enemy")
-                    {
-                        Debug.Log(Player_e.SpaceBy());
-                        Player_e.SubtractHealth();
-                        Debug.Log(Player_e.health);
-                    }
-                }
-            }
-            eidx++;
-            //var reset = enemy.current_tile;
-            //reset.GetComponent<SpriteRenderer>().color = //original_tile;
+                       if (attackBy[tileidx] == "Enemy")
+                       {
+                           Debug.Log(Player_e.SpaceBy());
+                           Player_e.SubtractHealth();
+                           Debug.Log(Player_e.health);
+                       }
+                   }
+               }*/
+               //eidx++;
+               //var reset = enemy.current_tile;
+               //reset.GetComponent<SpriteRenderer>().color = //original_tile;
         }
 
 
+    }
+
+    void tileCheck(int index, Entity enemy) {
+        Tiles_e[index].self.GetComponent<SpriteRenderer>().color = enemy.self.GetComponent<SpriteRenderer>().color;
+        Tiles_e[index] = new Entity(Tiles_e[index].self, index, "Enemy");
+        attackBy[index] = "Enemy";
+        if (currentPlayerTileIndex==index)
+        {
+            Debug.Log("Player Hit:");
+            Player_e.SubtractHealth();
+            Debug.Log(Player_e.health);  
+        }
     }
 
     bool CheckIntersectXY(v3 p1, v3 p2)
