@@ -20,7 +20,7 @@ public class sceneManager : MonoBehaviour
         {
             playerMovement.instance.enabled = true;
             player.GetComponent<AudioSource>().Play();
-            Application.UnloadLevel("test-scene");
+           // Application.UnloadLevel("test-scene");
         }
     }
 }

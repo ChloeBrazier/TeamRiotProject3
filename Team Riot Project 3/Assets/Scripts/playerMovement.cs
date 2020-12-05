@@ -37,6 +37,15 @@ public class playerMovement : MonoBehaviour
 
         //save spriterenderer
         sprite = GetComponent<SpriteRenderer>();
+
+        //PlayerStats.player_tr = transform.position;
+        if(PlayerStats.player_tr.x != 0 && PlayerStats.player_tr.y != 0 &&
+            PlayerStats.player_tr.y != 0)
+        {
+            transform.position = PlayerStats.player_tr;
+            Debug.Log(transform.position);
+        }
+        
     }
 
     // Update is called once per frame
@@ -48,7 +57,8 @@ public class playerMovement : MonoBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             transform.position += Vector3.up * 0.1f;
-            step+=0.1f;
+            PlayerStats.player_tr = transform.position;
+            step +=0.1f;
             if (time >= 0.25f)
             {
                 audioSource.PlayOneShot(impact, 0.7F);
@@ -60,6 +70,7 @@ public class playerMovement : MonoBehaviour
         if (Input.GetKey(KeyCode.S))
         {
             transform.position -= Vector3.up * 0.1f;
+            PlayerStats.player_tr = transform.position;
             step += 0.1f;
             if (time >= 0.25f)
             {
@@ -72,6 +83,7 @@ public class playerMovement : MonoBehaviour
         if (Input.GetKey(KeyCode.A))
         {
             transform.position -= Vector3.right * 0.1f;
+            PlayerStats.player_tr = transform.position;
             step += 0.1f;
             if (time >= 0.25f)
             {
@@ -85,6 +97,7 @@ public class playerMovement : MonoBehaviour
         if (Input.GetKey(KeyCode.D))
         {
             transform.position += Vector3.right * 0.1f;
+            PlayerStats.player_tr = transform.position;
             step += 0.1f;
             if (time >= 0.25f)
             {
