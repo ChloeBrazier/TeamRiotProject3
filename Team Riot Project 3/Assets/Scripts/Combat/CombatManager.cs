@@ -174,7 +174,7 @@ public class CombatManager : MonoBehaviour
     ElementAttacks player_attacks;
     Dir player_dir;
 
-    void Start()
+    void Awake()
     {
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);               // health bar stuff
@@ -478,14 +478,15 @@ public class CombatManager : MonoBehaviour
             submitmenu.SetActive(false);
             attackmenu.SetActive(true);
             moveselected = false;
-           
 
-            return;
+            ResetTileColor();
+
+            
         }
         //attack menu
         if(attackmenu.activeSelf == true)
         {
-            //ResetTileColor();
+            
             
             attackmenu.SetActive(false);
             elementmenu.SetActive(true);
@@ -521,7 +522,7 @@ public class CombatManager : MonoBehaviour
             default:
                 break;
         }
-        
+        return;
     }
 
     private enum enemyTurnPhase 
@@ -540,6 +541,7 @@ public class CombatManager : MonoBehaviour
             //num_moves = 3;
         }
 
+        //SET BACK ALSO CHECK CheckEnemyDmg
 
         //Debug.Log("Player LVL: " + player_lvl);
         /* if (player_lvl == 1)
@@ -609,8 +611,8 @@ public class CombatManager : MonoBehaviour
 
                 break;
             case combatOptions.attack:
-                
-                if (moveselected && submit == false)
+                bool c1 = moveselected && submit == false;
+                if (c1)
                 {
                     if (originalidx == -1)
                     {
@@ -624,7 +626,7 @@ public class CombatManager : MonoBehaviour
                     AttackSpaceMove(atk_prop.attackColor);
                     
                 }
-                else
+                else if(c1 == false && submit == true)
                 {
                     CheckEnemyDMG();
                     //player_attacks = ElementAttacks.none;
@@ -728,6 +730,7 @@ public class CombatManager : MonoBehaviour
 
                         if (attackBy[u] == "Player")
                         {
+                            //SET BACK
                             //enemyHealth[i]--;
                             enemyHealth[i] = 0;
                             Debug.Log("ENEMY TAKING DMG: " + i);
