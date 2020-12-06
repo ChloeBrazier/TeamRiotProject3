@@ -264,7 +264,7 @@ public class CombatManager : MonoBehaviour
             
             submitmenu.SetActive(false);
             player_attacks = ElementAttacks.none;
-            player_dir = Dir.down;
+            player_dir = Dir.none;
         }
         if (player_lvl < PlayerStats.lvl)
         {
@@ -478,15 +478,15 @@ public class CombatManager : MonoBehaviour
             submitmenu.SetActive(false);
             attackmenu.SetActive(true);
             moveselected = false;
-            back = true;
+           
 
             return;
         }
         //attack menu
         if(attackmenu.activeSelf == true)
         {
-            ResetTileColor();
-            back = false;
+            //ResetTileColor();
+            
             attackmenu.SetActive(false);
             elementmenu.SetActive(true);
             return;
@@ -616,7 +616,11 @@ public class CombatManager : MonoBehaviour
                     {
                         originalidx = currentPlayerTileIndex;
                     }
-                    
+                    Debug.Log(player_dir);
+                    if(player_dir == Dir.none)
+                    {
+                        player_dir = Dir.left;
+                    }
                     AttackSpaceMove(atk_prop.attackColor);
                     
                 }
@@ -693,6 +697,7 @@ public class CombatManager : MonoBehaviour
     bool dmgcheck = false;
     void CheckEnemyDMG()
     {
+        player_dir = Dir.none;
         if(submit == false)
         {
             return;
@@ -859,8 +864,9 @@ public class CombatManager : MonoBehaviour
                 break;
 
             default:
-                //player_dir = Dir.left;
-                //Attack(c, moveidx);
+                
+              
+                Attack(c, currentPlayerTileIndex + 1);
                 // player_dir = Dir.none;
                 break;
         }
