@@ -43,6 +43,13 @@ public class playButton : MonoBehaviour
         SceneManager.LoadScene(sceneName: "OverworldScene");
     }
 
+    public void MenuClick()
+    {
+        audioSource.PlayOneShot(impact, 0.7F);
+        text.color = Color.black;
+        SceneManager.LoadScene(sceneName: "StartMenu");
+    }
+
     public void CreditsClick()
     {
         GetComponent<AudioSource>().Play();
