@@ -613,9 +613,7 @@ MonoBehaviour:
   healthBar: {fileID: 1440940342}
   maxHealth: 100
   currentHealth: 0
-  reftile: {fileID: 88553811}
   Player: {fileID: 1631063456}
-  floor: {fileID: 359905958}
   Enemy: {fileID: 6261023617699274979, guid: ebe3b508fb2e26e4f8f72879f8055a65, type: 3}
   combatmenu: {fileID: 368369645}
   elementmenu: {fileID: 2081193555}
@@ -3016,7 +3014,7 @@ PrefabInstance:
     - target: {fileID: 2299641525462305082, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: AttackByElement
+      value: MenuAttackByElement
       objectReference: {fileID: 0}
     - target: {fileID: 2299641525462305082, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}
@@ -3081,7 +3079,7 @@ PrefabInstance:
     - target: {fileID: 2299641525505754429, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: AttackByElement
+      value: MenuAttackByElement
       objectReference: {fileID: 0}
     - target: {fileID: 2299641525505754429, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}
@@ -3151,7 +3149,7 @@ PrefabInstance:
     - target: {fileID: 2299641525818926619, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: AttackByElement
+      value: MenuAttackByElement
       objectReference: {fileID: 0}
     - target: {fileID: 2299641525818926619, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}
@@ -3186,7 +3184,7 @@ PrefabInstance:
     - target: {fileID: 2299641525859660846, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: AttackByElement
+      value: MenuAttackByElement
       objectReference: {fileID: 0}
     - target: {fileID: 2299641525859660846, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}
@@ -3401,7 +3399,7 @@ PrefabInstance:
     - target: {fileID: 2299641527230191578, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: AttackByElement
+      value: MenuAttackByElement
       objectReference: {fileID: 0}
     - target: {fileID: 2299641527230191578, guid: 8b11d31c8f0b1ad42882d86d871f2529,
         type: 3}
@@ -4983,7 +4981,7 @@ PrefabInstance:
     - target: {fileID: 2078863681229748874, guid: 3bd3e3dd3d7cb1b41b97b449c62c84c6,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: Attack
+      value: MenuOptionAttacks
       objectReference: {fileID: 0}
     - target: {fileID: 2078863681270999169, guid: 3bd3e3dd3d7cb1b41b97b449c62c84c6,
         type: 3}

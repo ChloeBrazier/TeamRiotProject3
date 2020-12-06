@@ -13,6 +13,7 @@ using UnityEngine.SceneManagement;
 
 public class CombatManager : MonoBehaviour
 {
+    //structs for holding data in the context of this scene //_e generally refers to entity 
     struct Entity
     {
         public v3 pos;
@@ -66,23 +67,9 @@ public class CombatManager : MonoBehaviour
            
             spaceby = sp;
         }
-        public void SetSpaceBy(String str)
-        {
-            spaceby = str;
-        }
-        public String SpaceBy()
-        {
-            return spaceby;
-        }
-        public void SubtractHealth()
-        {
-            health--;
-        }
-        public void AddHealth()
-        {
-            health++;
-        }
+       
     }
+    //attack properites//holds color values for floor attacks. 
     struct AttackProperties
     {
         public Color str;
@@ -102,30 +89,25 @@ public class CombatManager : MonoBehaviour
         }
         
     }
-    // Start is called before the first frame update
-    GameObject cam;
-    GameObject right;
-    GameObject left;
-    Camera mainCam;
-    Transform original = null;
+    // player ttack properties
     AttackProperties atk_prop;
-    int rows = 6;
-    int cols = 4;
+   
     int num_moves = 3;//note must change value in loop as well
     float tileSize = 1;
-
+    //player health
     public HealthBar healthBar;
     public int maxHealth = 100;
     public int currentHealth;                             // health bar stuff
 
-    public GameObject reftile;
+    //player obj
     public GameObject Player;
+    //controls the tile index for player
     private int currentPlayerTileIndex;
-    public GameObject floor;
-    //public GameObject Enemy;
+    
+    //enemy game object
     public GameObject Enemy;
-    float move_width;
-    float move_height;
+    
+    //list of all game object tiles 
     GameObject[] tiles;
     //Menus
     public GameObject combatmenu;
@@ -136,116 +118,135 @@ public class CombatManager : MonoBehaviour
     public GameObject attackmenu;
     public GameObject one;
     public GameObject two;
+    //array of elements to pick from 
     public GameObject[] elements;
-    bool moveselected = false;
-    bool w = false;
-    bool a = false;
-    bool s = false;
-    bool d = false;
-    
+    //determines player attack move selection 
+    bool playerATKMoveSelection = false;
+   
+    //number of enemies to spawn
     int num_enemies = 2;
+    //original player tile index
     int originalidx = -1;
+    //default tile color
     Color original_tile;
+    //determines player turn 
     bool playerTurn = false;
+    //player stats
     int player_lvl = 1;
     float xp_currentlvl = 0.0f;
     float xp_nextlvl = 100.0f;
-    v3 menu_pos;
+
+    //enemy list for number of enemies and their health
     List<Entity> Enemies;
     List<int> enemyHealth;
+    //list of all tiles that recived attacks by player or enemy
     List<string> attackBy;
-    
+    //entity holding tile info 
     List<Entity> Tiles_e;
-    private int updateInterval = 3;
+    
+    //player entity 
     Entity Player_e;
+    //game start value 
     bool gameStart = false;
+    //combat option enums for player state 
     public enum combatOptions
     {
         move, attack, flee, none, enemy
     }
+    //element enums for attacks
     public enum ElementAttacks
     {
         Quake, Ember, Douse, Bind, Harden, none
     }
+
+    //player direction enums for input direction 
     public enum Dir
     {
         left, right, up, down, none
     }
-    combatOptions currentOpt;//player
+    //enums
+    combatOptions currentOpt;
     ElementAttacks player_attacks;
     Dir player_dir;
 
     void Awake()
     {
+        //instantiate our lists for keeping track
         attackBy = new List<string>();
-      
         enemyHealth = new List<int>();
         Tiles_e = new List<Entity>();
+        Enemies = new List<Entity>();
+        //finding all gameobjects in scene with tile
         tiles = GameObject.FindGameObjectsWithTag("tile");
+        //counter for renaming them in order
         int c = 0;
         foreach (var tile in tiles)
         {
-            Debug.Log(tile.name);
-            //tile.name = c.ToString();
+            //adding a new entity with no attack space by anyone 
             Tiles_e.Add(new Entity(tile, c, ""));
+            //labeling attack by as empty for start
             attackBy.Add("empty");
             
             c++;
         }
+        //enums
+        player_attacks = ElementAttacks.none;
+        player_dir = Dir.none;
+        currentOpt = combatOptions.none;
     }
 
     void Start()
     {
+        //setting player health full
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);               // health bar stuff
         
-        //Debug.Log("Game START");
         
-        Enemies = new List<Entity>();
+        
+        //start tile
         GameObject starttile = tiles[0];
-        currentPlayerTileIndex = 0;
-        var spr_render = starttile.GetComponent<SpriteRenderer>().bounds.size;
-        move_width = spr_render.x;
-        move_height = spr_render.y;
+        currentPlayerTileIndex = 0; //inital index
+        
+        //fixing height for player position 
         var n_p = starttile.transform.position;
         n_p.y = -2;
         Player.transform.position = n_p;
-        //Debug.Log((Color)starttile.GetComponent<SpriteRenderer>().color);
+
+        //original tile color 
         original_tile = starttile.GetComponent<SpriteRenderer>().color;
 
-        
-        //ENEMY POS
-        //Enemy.transform.position = tiles[14].transform.position;
-
-        currentOpt = combatOptions.none;
-        
-        
-        
+        //player goes first
         playerTurn = true;
-
+        // creating player entity 
         Player_e = new Entity(Player, currentHealth, starttile, 0);
-        var enemies = GameObject.FindGameObjectsWithTag("enemy");
+        
+        //creating enemies 
         for(int i = 0; i < num_enemies; i++)
         {
+            //random location to spawn 
             var tile_range = (int)UnityEngine.Random.Range(0, tiles.Length-1);
             GameObject enemy = Instantiate(Enemy);
+            //adjust height 
             v3 e_p = tiles[tile_range].transform.position;
             e_p.y = -2f;
             enemy.transform.position = e_p;
+            //new enemy entities
             Enemies.Add(new Entity(enemy, 3, tiles[tile_range], tile_range));
-            enemyHealth.Add(3);
+            enemyHealth.Add(3); //basic health is 3
             
-            //enemy.transform.position = e_p;
+            //random color to choose from 
             var rand = (int)UnityEngine.Random.Range(0, 5);
             var renderer = enemy.GetComponent<SpriteRenderer>();
+            //each element
             switch (rand)
             {
                 case 0:
                     renderer.color = Color.green;
-                    // renderer.color = new v3(.6f, .4f, .2f);
+                    
                     break;
                 case 1:
                     renderer.color = Color.red;
+                   
                     break;
                 case 2:
                     renderer.color = Color.blue;
@@ -260,19 +261,20 @@ public class CombatManager : MonoBehaviour
                     break;
             }
         }
-        // Update is called once per frame
 
+
+
+        // if have done everything else 
         if (playerTurn == true)
         {
-            ////Debug.Log(playerTurn);
+            //gui's off at start 
             elementmenu.SetActive(false);
             movemenu.SetActive(false);
             fleemenu.SetActive(false);
             attackmenu.SetActive(false);
-            
             submitmenu.SetActive(false);
-            player_attacks = ElementAttacks.none;
-            player_dir = Dir.none;
+            
+            
         }
         if (player_lvl < PlayerStats.lvl)
         {
@@ -283,53 +285,53 @@ public class CombatManager : MonoBehaviour
     }
 
 
-
-    public void Attack(GameObject obj)
+    //from button in attack menu 
+    public void MenuOptionAttacks(GameObject obj)
     {
+        //hide attack menu 
         attackmenu.SetActive(false);
+        //show submit button
         submitmenu.SetActive(true);
-        moveselected = true;
-        if (back == false && submitmenu.activeSelf == true
-                && attackmenu.activeSelf == false)
-        {
-           // ResetTileColor();
-            //back = true;
-        }
+        //can move
+        playerATKMoveSelection = true;
 
+       
 
+        //based on button name
         switch (obj.GetComponentInChildren<Text>().text)
         {
             case "Quake":
                 
-               // //Debug.Log("Enemy health: " + Enemies[0].health);
+                // we get the color
                 atk_prop.attackColor = Color.green;
+                //choose the attack
                 player_attacks = ElementAttacks.Quake;
                 Debug.Log(player_attacks);
                 break;
             case "Ember":
                
-               // //Debug.Log("Enemy health: " + Enemies[0].health);
+               
                 atk_prop.attackColor = Color.red;
                 player_attacks = ElementAttacks.Ember;
                 Debug.Log(player_attacks);
                 break;
             case "Douse":
            
-               // //Debug.Log("Enemy health: " + Enemies[0].health);
+               
                 atk_prop.attackColor = Color.blue;
                 player_attacks = ElementAttacks.Douse;
                 Debug.Log(player_attacks);
                 break;
             case "Bind":
               
-               // Debug.Log("Enemy health: " + Enemies[0].health);
+               
                 atk_prop.attackColor = Color.Lerp(Color.yellow, Color.green, 0.75f);
                 player_attacks = ElementAttacks.Bind;
                 Debug.Log(player_attacks);
                 break;
             case "Harden":
                 
-               // Debug.Log("Enemy health: " + Enemies[0].health);
+               
                 atk_prop.attackColor = Color.grey;
                 player_attacks = ElementAttacks.Harden;
                 Debug.Log(player_attacks);
@@ -337,11 +339,12 @@ public class CombatManager : MonoBehaviour
             default:
                 break;
         }
-        //Debug.Log(obj.name);
+    
 
     }
 
-    public void AttackByElement(GameObject obj)
+    
+    public void MenuAttackByElement(GameObject obj)
     {
         attackmenu.SetActive(true);
         elementmenu.SetActive(false);
@@ -486,13 +489,13 @@ public class CombatManager : MonoBehaviour
            
             submitmenu.SetActive(false);
             attackmenu.SetActive(true);
-            moveselected = false;
+            playerATKMoveSelection = false;
 
-            if (submitmenu.activeSelf == false)
+            if (submitmenu.activeSelf == false && attackmenu.activeSelf == true)
             {
-                ResetTileColor();
+                //ResetTileColor();
             }
-
+            
             
         }
         //attack menu
@@ -625,7 +628,7 @@ public class CombatManager : MonoBehaviour
 
                     break;
                 case combatOptions.attack:
-                    bool c1 = moveselected && submit == false;
+                    bool c1 = playerATKMoveSelection && submit == false;
                     if (c1)
                     {
                         if (originalidx == -1)
@@ -689,7 +692,7 @@ public class CombatManager : MonoBehaviour
                             dmgcheck = false;
                             enemy_Move = false;
                             enemy_atk = false;
-                            moveselected = false;
+                            playerATKMoveSelection = false;
                             dmgcheck = false;
 
                             currentOpt = combatOptions.none;
