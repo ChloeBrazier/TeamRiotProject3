@@ -12,6 +12,7 @@ public class playButton : MonoBehaviour
     public Text text;
     public List<GameObject> buttons;
     public List<GameObject> credits;
+    public List<GameObject> controls;
     // Start is called before the first frame update
     void Start()
     {
@@ -68,6 +69,41 @@ public class playButton : MonoBehaviour
         foreach (GameObject creditsItem in credits)
         {
             creditsItem.SetActive(false);
+        }
+
+        foreach (GameObject button in buttons)
+        {
+            button.SetActive(true);
+        }
+    }
+
+    public void ControlsClick()
+    {
+        GetComponent<AudioSource>().Play();
+        text.color = Color.white;
+
+        //disable main menu buttons
+        foreach (GameObject button in buttons)
+        {
+            button.SetActive(false);
+        }
+
+        //enable controls menu
+        foreach (GameObject controlsItem in controls)
+        {
+            controlsItem.SetActive(true);
+        }
+    }
+
+    public void ControlsExit()
+    {
+        GetComponent<AudioSource>().Play();
+        text.color = Color.white;
+
+        //disable controls menu and re-enable main menu buttons
+        foreach (GameObject controlsItem in controls)
+        {
+            controlsItem.SetActive(false);
         }
 
         foreach (GameObject button in buttons)
