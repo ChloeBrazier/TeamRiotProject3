@@ -1673,73 +1673,73 @@ public class CombatManager : MonoBehaviour
                 //play sound
                 audio.PlayOneShot(combatClips[3]);
 
-                if (currentPlayerTileIndex - 7 >= 0)
+                /*if (currentPlayerTileIndex - 7 >= 0)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex - 7;
                     moving = true; //set move true 
                     num_moves--;
-                }
-               /* if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
+                }*/
+                if (currentPlayerTileIndex - tiles.Length / 4 >= 0)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex - tiles.Length / 4;
                     moving = true;
                     num_moves--;
-                }*/
+                }
             }
             else if (Input.GetKeyDown(KeyCode.A))
             {
                 //play sound
                 audio.PlayOneShot(combatClips[3]);
 
-                if (currentPlayerTileIndex + 1 <= tiles.Length)
+                /*if (currentPlayerTileIndex + 1 <= tiles.Length)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex + 1;
                     moving = true;
                     num_moves--;
-                }
+                }*/
                 
-                /* if ((currentPlayerTileIndex + 1) % 7 != 0)
+                 if ((currentPlayerTileIndex + 1) % 7 != 0)
                  {
                      currentPlayerTileIndex = currentPlayerTileIndex + 1;
                      moving = true;
                      num_moves--;
-                 }*/
+                 }
             }
             else if (Input.GetKeyDown(KeyCode.W))
             {
                 //play sound
                 audio.PlayOneShot(combatClips[3]);
 
-                if (currentPlayerTileIndex + 7 <= tiles.Length)
+                /*if (currentPlayerTileIndex + 7 <= tiles.Length)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex + 7;
                     moving = true;
                     num_moves--;
-                }
-                /*if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
+                }*/
+                if (currentPlayerTileIndex + tiles.Length / 4 <= tiles.Length)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex + tiles.Length / 4;
                     moving = true;
                     num_moves--;
-                }*/
+                }
             }
             else if (Input.GetKeyDown(KeyCode.D))
             {
                 //play sound
                 audio.PlayOneShot(combatClips[3]);
 
-                if (currentPlayerTileIndex - 1 >= 0)
-                {
-                    currentPlayerTileIndex = currentPlayerTileIndex - 1;
-                    moving = true;
-                    num_moves--;
-                }
-                /*if ((currentPlayerTileIndex) % 7 != 0)
+                /*if (currentPlayerTileIndex - 1 >= 0)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex - 1;
                     moving = true;
                     num_moves--;
                 }*/
+                if ((currentPlayerTileIndex) % 7 != 0)
+                {
+                    currentPlayerTileIndex = currentPlayerTileIndex - 1;
+                    moving = true;
+                    num_moves--;
+                }
             }
             
         } //if we ran out of moves or its not our turn anymore inbetween frames 
