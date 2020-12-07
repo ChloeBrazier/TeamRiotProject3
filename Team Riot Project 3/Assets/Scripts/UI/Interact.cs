@@ -35,6 +35,7 @@ public class Interact : MonoBehaviour
         {
             //TODO: load boss fight scene
             Debug.Log("encountered boss");
+            GetComponentInParent<AudioSource>().Stop();
             playerMovement.instance.enabled = false;
             SceneManager.LoadScene("test-scene", LoadSceneMode.Additive);
             PlayerStats.finalEncounter = true;

@@ -639,54 +639,54 @@ public class CombatManager : MonoBehaviour
             //SET BACK ALSO CHECK CheckEnemyDmg
 
             //displays abilities based off of player lvl 
-             if (player_lvl == 1)
-             {
-                 elements[0].SetActive(true);
-                 elements[1].SetActive(false);
-                 elements[2].SetActive(false);
-                 elements[3].SetActive(false);
-                 elements[4].SetActive(false);
-             }
-             if (player_lvl == 2)
-             {
-                 elements[0].SetActive(true);
-                 elements[1].SetActive(true);
-                 elements[2].SetActive(false);
-                 elements[3].SetActive(false);
-                 elements[4].SetActive(false);
-             }
-             if (player_lvl == 3)
-             {
-                 elements[0].SetActive(true);
-                 elements[1].SetActive(true);
-                 elements[2].SetActive(false);
-                 elements[3].SetActive(false);
-                 elements[4].SetActive(false);
-             }
-             if (player_lvl == 4)
-             {
-                 elements[0].SetActive(true);
-                 elements[1].SetActive(true);
-                 elements[2].SetActive(true);
-                 elements[3].SetActive(false);
-                 elements[4].SetActive(false);
-             }
-             if (player_lvl == 5)
-             {
-                 elements[0].SetActive(true);
-                 elements[1].SetActive(true);
-                 elements[2].SetActive(true);
-                 elements[3].SetActive(true);
-                 elements[4].SetActive(false);
-             }
-             if (player_lvl >= 6)
-             {
-                 elements[0].SetActive(true);
-                 elements[1].SetActive(true);
-                 elements[2].SetActive(true);
-                 elements[3].SetActive(true);
-                 elements[4].SetActive(true);
-            }
+            // if (player_lvl == 1)
+            // {
+            //     elements[0].SetActive(true);
+            //     elements[1].SetActive(false);
+            //     elements[2].SetActive(false);
+            //     elements[3].SetActive(false);
+            //     elements[4].SetActive(false);
+            // }
+            // if (player_lvl == 2)
+            // {
+            //     elements[0].SetActive(true);
+            //     elements[1].SetActive(true);
+            //     elements[2].SetActive(false);
+            //     elements[3].SetActive(false);
+            //     elements[4].SetActive(false);
+            // }
+            // if (player_lvl == 3)
+            // {
+            //     elements[0].SetActive(true);
+            //     elements[1].SetActive(true);
+            //     elements[2].SetActive(false);
+            //     elements[3].SetActive(false);
+            //     elements[4].SetActive(false);
+            // }
+            // if (player_lvl == 4)
+            // {
+            //     elements[0].SetActive(true);
+            //     elements[1].SetActive(true);
+            //     elements[2].SetActive(true);
+            //     elements[3].SetActive(false);
+            //     elements[4].SetActive(false);
+            // }
+            // if (player_lvl == 5)
+            // {
+            //     elements[0].SetActive(true);
+            //     elements[1].SetActive(true);
+            //     elements[2].SetActive(true);
+            //     elements[3].SetActive(true);
+            //     elements[4].SetActive(false);
+            // }
+            // if (player_lvl >= 6)
+            // {
+            //     elements[0].SetActive(true);
+            //     elements[1].SetActive(true);
+            //     elements[2].SetActive(true);
+            //     elements[3].SetActive(true);
+            //     elements[4].SetActive(true);
+            //}
             if (updated)
             {
                 currentOpt = combatOptions.none;
@@ -927,7 +927,7 @@ public class CombatManager : MonoBehaviour
                             Debug.Log(enemyHealth[i]);
 
                             //decrease health
-                            enemyHealth[i]--;
+                            enemyHealth[i] = 0;
                            
                             //Debug.Log("ENEMY TAKING DMG: " + i);
                             //Debug.Log(enemyHealth[i]);
