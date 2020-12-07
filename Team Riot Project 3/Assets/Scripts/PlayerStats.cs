@@ -7,6 +7,7 @@ public class PlayerStats : MonoBehaviour
 
     public static int lvl;
     public static Vector3 player_tr;
+    public static bool finalEncounter = false;
     // Start is called before the first frame update
     void Start()
     {

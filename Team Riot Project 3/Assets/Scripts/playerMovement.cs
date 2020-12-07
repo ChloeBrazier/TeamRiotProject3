@@ -117,6 +117,7 @@ public class playerMovement : MonoBehaviour
             GetComponent<AudioSource>().Stop();
             step = 0.0f;
             playerMovement.instance.enabled = false;
+            Debug.Log("entering combat");
             SceneManager.LoadScene("test-scene", LoadSceneMode.Additive);
         }
 

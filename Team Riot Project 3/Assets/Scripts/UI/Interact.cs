@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Interact : MonoBehaviour
 {
@@ -34,7 +35,9 @@ public class Interact : MonoBehaviour
         {
             //TODO: load boss fight scene
             Debug.Log("encountered boss");
-
+            playerMovement.instance.enabled = false;
+            SceneManager.LoadScene("test-scene", LoadSceneMode.Additive);
+            PlayerStats.finalEncounter = true;
             bossEncounter = false;
         }
 

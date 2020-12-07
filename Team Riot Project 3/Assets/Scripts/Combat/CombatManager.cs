@@ -1750,7 +1750,11 @@ public class CombatManager : MonoBehaviour
         ResetTileColor();
         
         //load scenes
-        if (currentHealth <= 0)
+        if(PlayerStats.finalEncounter == true)
+        {
+            SceneManager.LoadScene("WinScene");
+        }
+        else if (currentHealth <= 0)
         {
             Player_e.self.SetActive(false);
             SceneManager.LoadScene("EndScene");
