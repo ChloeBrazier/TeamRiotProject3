@@ -175,6 +175,10 @@ public class CombatManager : MonoBehaviour
     Dir player_dir;
     enemyTurnPhase enemyTurn;
 
+    //audio
+    public List<AudioClip> combatClips;
+    private AudioSource audio;
+
     void Awake()
     {
         //instantiate our lists for keeping track
@@ -206,9 +210,10 @@ public class CombatManager : MonoBehaviour
         //setting player health full
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);               // health bar stuff
-        
-        
-        
+
+        //assign audio source
+        audio = GetComponent<AudioSource>();
+
         //start tile
         GameObject starttile = tiles[0];
         currentPlayerTileIndex = 0; //inital index
@@ -307,7 +312,9 @@ public class CombatManager : MonoBehaviour
         switch (obj.GetComponentInChildren<Text>().text)
         {
             case "Quake":
-                
+                //play sound
+                audio.PlayOneShot(combatClips[5]);
+
                 // we set the color
                 atk_prop.attackColor = Color.green;
                 //choose the attack
@@ -315,29 +322,33 @@ public class CombatManager : MonoBehaviour
                 Debug.Log(player_attacks);
                 break;
             case "Ember":
-               
-               
+                //play sound
+                audio.PlayOneShot(combatClips[4]);
+
                 atk_prop.attackColor = Color.red;
                 player_attacks = ElementAttacks.Ember;
                 Debug.Log(player_attacks);
                 break;
             case "Douse":
-           
-               
+                //play sound
+                audio.PlayOneShot(combatClips[7]);
+
                 atk_prop.attackColor = Color.blue;
                 player_attacks = ElementAttacks.Douse;
                 Debug.Log(player_attacks);
                 break;
             case "Bind":
-              
-               
+                //play sound
+                audio.PlayOneShot(combatClips[8]);
+
                 atk_prop.attackColor = Color.Lerp(Color.yellow, Color.green, 0.75f);
                 player_attacks = ElementAttacks.Bind;
                 Debug.Log(player_attacks);
                 break;
             case "Harden":
-                
-               
+                //play sound
+                audio.PlayOneShot(combatClips[6]);
+
                 atk_prop.attackColor = Color.grey;
                 player_attacks = ElementAttacks.Harden;
                 Debug.Log(player_attacks);
@@ -352,6 +363,9 @@ public class CombatManager : MonoBehaviour
     //elements from menu option 
     public void MenuAttackByElement(GameObject obj)
     {
+        //play sound
+        audio.PlayOneShot(combatClips[0]);
+
         //turning on attack menu 
         attackmenu.SetActive(true);
         //turning off current element menu 
@@ -411,6 +425,9 @@ public class CombatManager : MonoBehaviour
     //main menu //if we attack
     public void AttackOption()
     {
+        //play sound
+        audio.PlayOneShot(combatClips[0]);
+
 
         //show element sub menu 
         elementmenu.SetActive(true);
@@ -423,6 +440,9 @@ public class CombatManager : MonoBehaviour
     //move option in main
     public void MoveOption()
     {
+        //play sound
+        audio.PlayOneShot(combatClips[0]);
+
         //setting number of moves for player to go
         num_moves = 3;
         movemenu.SetActive(true);
@@ -434,7 +454,9 @@ public class CombatManager : MonoBehaviour
     //main menu flee option 
     public void FleeOption()
     {
-       
+        //play sound
+        audio.PlayOneShot(combatClips[0]);
+
         fleemenu.SetActive(true);
         combatmenu.SetActive(!combatmenu.activeSelf);
         currentOpt = combatOptions.flee;
@@ -443,6 +465,9 @@ public class CombatManager : MonoBehaviour
     //method to flee from fight 
     public void Flee()
     {
+        //play sound
+        audio.PlayOneShot(combatClips[0]);
+
         //if we're in flee 
         if (currentOpt == combatOptions.flee)
         {
@@ -468,6 +493,9 @@ public class CombatManager : MonoBehaviour
     //move menu submit button 
     public void MoveEnter()
     {
+        //play sound
+        audio.PlayOneShot(combatClips[0]);
+
         //close menu 
         movemenu.SetActive(false);
         //currentOpt = combatOptions.enemy;
@@ -486,6 +514,9 @@ public class CombatManager : MonoBehaviour
     //attack submit button 
     public void AttackEnter()
     {
+        //play sound
+        audio.PlayOneShot(combatClips[0]);
+
         //submitmenu.SetActive(false);
         submitmenu.SetActive(false);
         
@@ -500,6 +531,9 @@ public class CombatManager : MonoBehaviour
     bool back = false;
     public void Back()
     {
+        //play sound
+        audio.PlayOneShot(combatClips[0]);
+
         Debug.Log("BACK MAIN");
         //attack move submit menu 
         if (submitmenu.activeSelf == true)
@@ -781,6 +815,8 @@ public class CombatManager : MonoBehaviour
                             //enemy takes dmg 
                             enemyHealth[i] = 0;
                             Debug.Log("ENEMY TAKING DMG: " + i);
+                            //play sound
+                            audio.PlayOneShot(combatClips[1]);
                             Debug.Log(enemyHealth[i]);
                             if (enemyHealth[i] <= 0)
                             {
@@ -1307,6 +1343,9 @@ public class CombatManager : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.S))
             {
+                //play sound
+                audio.PlayOneShot(combatClips[3]);
+
                 if (currentPlayerTileIndex - 7 >= 0)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex - 7;
@@ -1322,6 +1361,9 @@ public class CombatManager : MonoBehaviour
             }
             else if (Input.GetKeyDown(KeyCode.A))
             {
+                //play sound
+                audio.PlayOneShot(combatClips[3]);
+
                 if (currentPlayerTileIndex + 1 <= tiles.Length)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex + 1;
@@ -1338,6 +1380,9 @@ public class CombatManager : MonoBehaviour
             }
             else if (Input.GetKeyDown(KeyCode.W))
             {
+                //play sound
+                audio.PlayOneShot(combatClips[3]);
+
                 if (currentPlayerTileIndex + 7 <= tiles.Length)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex + 7;
@@ -1353,6 +1398,9 @@ public class CombatManager : MonoBehaviour
             }
             else if (Input.GetKeyDown(KeyCode.D))
             {
+                //play sound
+                audio.PlayOneShot(combatClips[3]);
+
                 if (currentPlayerTileIndex - 1 >= 0)
                 {
                     currentPlayerTileIndex = currentPlayerTileIndex - 1;
@@ -1657,6 +1705,8 @@ public class CombatManager : MonoBehaviour
             //Debug.Log("Player Hit:");
             //Player_e.SubtractHealth();
             currentHealth -= 10;
+            //play sound
+            audio.PlayOneShot(combatClips[2]);
             healthBar.SetHealth(currentHealth);
             attackBy[index] = "empty";
             if (currentHealth <= 0)

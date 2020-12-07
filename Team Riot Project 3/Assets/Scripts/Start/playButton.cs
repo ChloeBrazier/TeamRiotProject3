@@ -50,6 +50,13 @@ public class playButton : MonoBehaviour
         SceneManager.LoadScene(sceneName: "StartMenu");
     }
 
+    public void ExitClick()
+    {
+        audioSource.PlayOneShot(impact, 0.7F);
+        text.color = Color.black;
+        Application.Quit();
+    }
+
     public void CreditsClick()
     {
         GetComponent<AudioSource>().Play();
