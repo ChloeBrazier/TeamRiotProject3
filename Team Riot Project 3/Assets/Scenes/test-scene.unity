@@ -615,6 +615,7 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth: 0
   Player: {fileID: 1631063456}
+  Boss: {fileID: 5373649945439047342, guid: 57930cd851534f643929c341e48e02a4, type: 3}
   Enemy: {fileID: 6261023617699274979, guid: ebe3b508fb2e26e4f8f72879f8055a65, type: 3}
   combatmenu: {fileID: 368369645}
   elementmenu: {fileID: 2081193555}
@@ -3852,7 +3853,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1587099622}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: b6826933f8829c7479e339cf3982dd4f, type: 3}

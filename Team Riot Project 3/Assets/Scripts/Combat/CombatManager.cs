@@ -101,6 +101,8 @@ public class CombatManager : MonoBehaviour
 
     //player obj
     public GameObject Player;
+    //boss
+    public GameObject Boss;
     //controls the tile index for player
     private int currentPlayerTileIndex;
     
@@ -143,7 +145,8 @@ public class CombatManager : MonoBehaviour
     List<string> attackBy;
     //entity holding tile info 
     List<Entity> Tiles_e;
-    
+    List<int> changed;
+    List<int> en_changed;
     //player entity 
     Entity Player_e;
     //game start value 
@@ -186,6 +189,8 @@ public class CombatManager : MonoBehaviour
         enemyHealth = new List<int>();
         Tiles_e = new List<Entity>();
         Enemies = new List<Entity>();
+        changed = new List<int>();
+        en_changed = new List<int>();
         //finding all gameobjects in scene with tile
         tiles = GameObject.FindGameObjectsWithTag("tile");
         //counter for renaming them in order
@@ -225,17 +230,21 @@ public class CombatManager : MonoBehaviour
 
         //original tile color 
         original_tile = starttile.GetComponent<SpriteRenderer>().color;
-
-        //player goes first
-        playerTurn = true;
+        
         // creating player entity 
         Player_e = new Entity(Player, currentHealth, starttile, 0);
-        
+
+        if (player_lvl < PlayerStats.lvl)
+        {
+            player_lvl = PlayerStats.lvl;
+            
+        }
+
         //creating enemies 
-        for(int i = 0; i < num_enemies; i++)
+        for (int i = 0; i < num_enemies; i++)
         {
             //random location to spawn 
-            var tile_range = (int)UnityEngine.Random.Range(0, tiles.Length-1);
+            var tile_range = (int)UnityEngine.Random.Range(1, tiles.Length-1);
             GameObject enemy = Instantiate(Enemy);
             //adjust height 
             v3 e_p = tiles[tile_range].transform.position;
@@ -275,21 +284,31 @@ public class CombatManager : MonoBehaviour
 
 
 
-        // if have done everything else 
-        if (playerTurn == true)
+        elementmenu.SetActive(false);
+        movemenu.SetActive(false);
+        fleemenu.SetActive(false);
+        attackmenu.SetActive(false);
+        submitmenu.SetActive(false);
+        two.SetActive(false);
+        
+        //adding boss if we're at lvl 6
+        if(player_lvl >= 6)
         {
-            //gui's off at start 
-            elementmenu.SetActive(false);
-            movemenu.SetActive(false);
-            fleemenu.SetActive(false);
-            attackmenu.SetActive(false);
-            submitmenu.SetActive(false);
-            two.SetActive(false);
+            //random location to spawn 
+            var tile_range = (int)UnityEngine.Random.Range(1, tiles.Length - 1);
+            GameObject enemy = Instantiate(Boss);
+            enemy.name = "boss";
+            enemy.GetComponent<SpriteRenderer>().color = Color.red;
+            //adjust height 
+            v3 e_p = tiles[tile_range].transform.position;
+            e_p.y = -2f;
+            enemy.transform.position = e_p;
+            //boss entities
+            Enemies.Add(new Entity(enemy, 3, tiles[tile_range], tile_range));
+            num_enemies++;
+            enemyHealth.Add(player_lvl); //basic health is 3
+
             
-        }
-        if (player_lvl < PlayerStats.lvl)
-        {
-            player_lvl = PlayerStats.lvl;
         }
         //Application.targetFrameRate = 30;
         gameStart = true;
@@ -432,7 +451,7 @@ public class CombatManager : MonoBehaviour
         //show element sub menu 
         elementmenu.SetActive(true);
         //turn off main
-        combatmenu.SetActive(!combatmenu.activeSelf);
+       // combatmenu.SetActive(!combatmenu.activeSelf);
         //current option is attack
         currentOpt = combatOptions.attack;
     }
@@ -444,9 +463,9 @@ public class CombatManager : MonoBehaviour
         audio.PlayOneShot(combatClips[0]);
 
         //setting number of moves for player to go
-        num_moves = 3;
+        
         movemenu.SetActive(true);
-        combatmenu.SetActive(!combatmenu.activeSelf);
+       // combatmenu.SetActive(!combatmenu.activeSelf);
         //changing current option 
         currentOpt = combatOptions.move;
     }
@@ -458,7 +477,7 @@ public class CombatManager : MonoBehaviour
         audio.PlayOneShot(combatClips[0]);
 
         fleemenu.SetActive(true);
-        combatmenu.SetActive(!combatmenu.activeSelf);
+       // combatmenu.SetActive(!combatmenu.activeSelf);
         currentOpt = combatOptions.flee;
     }
     
@@ -475,8 +494,8 @@ public class CombatManager : MonoBehaviour
             var range = (int)UnityEngine.Random.Range(0, Enemies.Count);
             if (range % 2 != 0) //we failed 
             {
-                playerTurn = false;
-                currentOpt = combatOptions.none;
+                
+                currentOpt = combatOptions.enemy;
 
             }
             else if (range % 2 == 0) //we escaped 
@@ -488,7 +507,7 @@ public class CombatManager : MonoBehaviour
 
 
     //used to check MoveEnter() click on next frame 
-    bool move = false;
+    bool moveenter = false;
 
     //move menu submit button 
     public void MoveEnter()
@@ -497,13 +516,13 @@ public class CombatManager : MonoBehaviour
         audio.PlayOneShot(combatClips[0]);
 
         //close menu 
-        movemenu.SetActive(false);
+        //movemenu.SetActive(false);
         //currentOpt = combatOptions.enemy;
         //enemyTurn = enemyTurnPhase.move;
         //StartCoroutine(CheckEnemyDMG());
         //playerTurn = false;
-       // button has been clicked 
-        move = true;
+        // button has been clicked 
+        moveenter = true;
 
     }
 
@@ -536,57 +555,59 @@ public class CombatManager : MonoBehaviour
 
         Debug.Log("BACK MAIN");
         //attack move submit menu 
-        if (submitmenu.activeSelf == true)
-        {
-           // Debug.Log("BACK: " + back);
-           //we change menus and turn off player selection 
-            submitmenu.SetActive(false);
-            attackmenu.SetActive(true);
-            playerATKMoveSelection = false;
-            
-            
-
-        }
-        //attack menu //we exit into the main element menu from here and return 
-        if(attackmenu.activeSelf == true)
-        {
-            if (submitmenu.activeSelf == false && elementmenu.activeSelf == false)
-            {
-               // playerATKMoveSelection = false;
-                Debug.Log(playerATKMoveSelection);
-                //ResetTileColor();
-            }
-
-            attackmenu.SetActive(false);
-            elementmenu.SetActive(true);
-            return;
-        }
-        //if we're in element go to main 
-        if (elementmenu.activeSelf == true)
-        {
-            //back = false;
-            elementmenu.SetActive(false);
-            combatmenu.SetActive(true);
-            
-            return;
-        }
+        
         //if we're in main menu options, just switch 
         switch (currentOpt)
         {
             case combatOptions.move:
                 movemenu.SetActive(false);
-                combatmenu.SetActive(!combatmenu.activeSelf);
-                currentOpt = combatOptions.none;
+               // combatmenu.SetActive(!combatmenu.activeSelf);
+                if(num_moves == 3) //back to main in same phase
+                {
+                    currentOpt = combatOptions.none;
+                }
+                else if (num_moves < 3) //next phase
+                {
+                   // currentOpt = combatOptions.enemy;
+                    moveenter = true;
+                }
+
 
                 break;
             case combatOptions.attack:
-                elementmenu.SetActive(false);
-                combatmenu.SetActive(!combatmenu.activeSelf);
-                currentOpt = combatOptions.none;
+                //elementmenu.SetActive(false);
+                //combatmenu.SetActive(!combatmenu.activeSelf);
+                
+                if (submitmenu.activeSelf == true)
+                {
+                    // Debug.Log("BACK: " + back);
+                    //we change menus and turn off player selection 
+                    submitmenu.SetActive(false);
+                    // attackmenu.SetActive(true);
+                   // player_attacks = ElementAttacks.none;
+                    
+                    
+                    elementmenu.SetActive(true);
+                    player_dir = Dir.left;
+                    ResetPlayerTiles();
+                    
+                    return;
+                }
+               
+                //if we're in element go to main 
+                if (elementmenu.activeSelf == true)
+                {
+                    //back = false;
+                    elementmenu.SetActive(false);
+                    // combatmenu.SetActive(true);
+                    currentOpt = combatOptions.none;
+                    return;
+                }
+                
                 break;
             case combatOptions.flee:
                 fleemenu.SetActive(false);
-                combatmenu.SetActive(!combatmenu.activeSelf);
+                //combatmenu.SetActive(!combatmenu.activeSelf);
                 currentOpt = combatOptions.none;
                 break;
             case combatOptions.none:
@@ -598,9 +619,13 @@ public class CombatManager : MonoBehaviour
     }
 
 
+    int phase_count = 0;
+    int old_phase = 0;
+    bool updated = false;
     
     void Update()
     {
+        //Debug.Log("ATTACK STATE: " + player_attacks);
         //once everything has been initialized, gamestart should be true 
         if (gameStart)
         {
@@ -609,15 +634,12 @@ public class CombatManager : MonoBehaviour
             {
                 PlayerStats.lvl = player_lvl;
             }
-            if (combatmenu.activeSelf == true && currentOpt != combatOptions.move)
-            {
-                //num_moves = 3;
-            }
+
 
             //SET BACK ALSO CHECK CheckEnemyDmg
 
             //displays abilities based off of player lvl 
-            /* if (player_lvl == 1)
+             if (player_lvl == 1)
              {
                  elements[0].SetActive(true);
                  elements[1].SetActive(false);
@@ -664,107 +686,150 @@ public class CombatManager : MonoBehaviour
                  elements[2].SetActive(true);
                  elements[3].SetActive(true);
                  elements[4].SetActive(true);
-             }*/
-             //by the current option afforded to the player 
-            switch (currentOpt)
+            }
+            if (updated)
             {
+                currentOpt = combatOptions.none;
+                updated = false;
+                ResetPlayerTiles();
+                Debug.Log("UPDATED");
+            }
+            if (moveenter)
+            {
+                Debug.Log("MOVED");
+                
+                movemenu.SetActive(false);
+                ResetEnemyTiles();
+                currentOpt = combatOptions.enemy;
+                //return;
+            }
+            if (submit)
+            {
+                CheckEnemyDMG();
+                if (dmgcheck)
+                {
+                    currentOpt = combatOptions.enemy;
+
+                    submitmenu.SetActive(false);
+                    submit = false;
+                    playerTurn = true;
+                    ResetEnemyTiles();
+                    dmgcheck = false;
+                    return;
+                }
+                
+                
+            }
+            if (currentOpt == combatOptions.none)
+            {
+                Debug.Log(currentOpt);
+                if (combatmenu.activeSelf == false)
+                {
+                    //Debug.Log("MAIN MENU");
+                    combatmenu.SetActive(true);
+                    playerTurn = false;
+                    submit = false;
+                    moveenter = false;
+                    num_moves = 3;
+                    originalidx = -1;
+                    player_attacks = ElementAttacks.none;
+                    player_dir = Dir.none;
+
+                    //ResetTileColor();
+                    //ResetTileColor();
+
+                }
+                
+            }
+            //by the current option afforded to the player 
+            if (currentOpt == combatOptions.attack && submit == false)
+            {
+                Debug.Log(currentOpt);
+                combatmenu.SetActive(false);
+                Debug.Log(playerTurn);
+                Debug.Log(player_attacks);
+                if(player_attacks != ElementAttacks.none && submit == false 
+                    && playerTurn == false)
+                {
+                    if (player_dir == Dir.none)
+                    {
+                        player_dir = Dir.left;
+                    }
+                    if (originalidx == -1)
+                    {
+                        originalidx = currentPlayerTileIndex;
+                    }
+                    //Debug.Log(player_attacks);
+                    Debug.Log(player_dir); 
+                    AttackSpaceMove(atk_prop.attackColor);
+                }
+
+              /*  if (player_dir == Dir.none)
+                {
+                    player_dir = Dir.left;
+                }
+                //displays the range of attack and our direction 
+                AttackSpaceMove(atk_prop.attackColor);*/
+            }
+            if (currentOpt == combatOptions.move && moveenter == false)
+            {
+                combatmenu.SetActive(false);
+                //Debug.Log("Move Phase");
+                PlayerMove();
+                //return;
+            }
+            if (currentOpt == combatOptions.enemy)
+            {
+
+                Debug.Log("ENEMY PHASE");
+                Debug.Log(playerTurn);
+                RunEnemies();
+                //StartCoroutine(RunEnemies());
+                //RunEnemies();
+                //Invoke("RunEnemies", 1.0f);
+
+                Debug.Log("Finished Enemy Phase");
+                submit = false;
+                moveenter = false;
+                playerTurn = false;
+                //player_attacks = ElementAttacks.none;
+
+                updated = true;
+                
+                // currentOpt = combatOptions.none;
+                //updated = RunEnemies();
+
+
+            }
+           /* switch (currentOpt)
+            {
+                
                 case combatOptions.move:
                     
-                    if (move == true) //if move is true, then we have moved 
-                    {
-                        movemenu.SetActive(false); //close menu 
-                        currentOpt = combatOptions.enemy; //change for enemy turn 
-                        //reset move 
-                        move = false;
-                        num_moves = 3;
-                    }
-                    //if move is false, then we havent moved yet. 
-                    if (num_moves >= 0 && move == false && currentOpt == combatOptions.move)
-                    {
-                        PlayerMove();
-
-                    }
+                
 
                     break;
                 case combatOptions.attack:
-                    //bool statement to check attack and submit 
-                    bool c1 = playerATKMoveSelection && submit == false;
-                    if (c1)
-                    {
-                        //stores the original tile index by battl ephase 
-                        if (originalidx == -1)
-                        {
-                            originalidx = currentPlayerTileIndex;
-                        }
-
-                        //Debug.Log(player_dir);
-                        //default player direction 
-                        if (player_dir == Dir.none)
-                        {
-                            player_dir = Dir.left;
-                        }
-                        //displays the range of attack and our direction 
-                        AttackSpaceMove(atk_prop.attackColor);
-
-                    } //if out statement is false and we hti the submit button, check the dmg
-                    else if (c1 == false && submit == true)
-                    {
-                        CheckEnemyDMG();
-                       
-                    }
+                    
+                    
+                    
+                    
                     break;
                 case combatOptions.flee:
+                    //combatmenu.SetActive(false);
+                    
                     break;
                 case combatOptions.none:
-
+                    //Debug.Log("MAIN MENU");
+                    
                     break;
                 case combatOptions.enemy:
-                    //in enemy phase 
-                    Debug.Log("ENEMY PHASE");
+                    
 
-                    //if no enemies in between frames, just break
-                    if (Enemies.Count == 0)
-                    {
-                        break;
-                    } //if the enemy turn is move 
-                    else if (enemyTurn == enemyTurnPhase.move)
-                    {
-
-                        //moves enemy 
-                        EnemyMove();
-                        //then the enemy will attack 
-                        enemyTurn = enemyTurnPhase.attack;
-                    }
-                    else if (enemyTurn == enemyTurnPhase.attack)
-                    {
-
-                        EnemyAttack();
-                        //end enemy phase //switch back to move 
-                        enemyTurn = enemyTurnPhase.move;
-                        //if we have processed through enemy attack and move then we can reset our values 
-                        if (enemy_atk == true && enemy_Move == true)
-                        {
-                            playerTurn = true;
- 
-                            originalidx = -1;
-
-                            submit = false;
-                            dmgcheck = false;
-                            enemy_Move = false;
-                            enemy_atk = false;
-                            playerATKMoveSelection = false;
-                            dmgcheck = false;
-
-                            currentOpt = combatOptions.none;
-                        }
-
-                    }
-                    //open main menu 
-                    combatmenu.SetActive(true);
 
 
                     break;
-            }
+            }*/
 
 
 
@@ -772,6 +837,47 @@ public class CombatManager : MonoBehaviour
 
         }
 
+    }
+    bool ran = false;
+    void RunEnemies()
+    {
+
+        //ResetTileColor();
+        //num_moves = 0;
+        old_phase = phase_count;
+        phase_count++;
+        //in enemy phase 
+        //Debug.Log("ENEMY PHASE + " + phase_count);
+        //Debug.Log("UPDATED : " + updated);
+        //if no enemies in between frames, just break
+        if (enemyTurn == enemyTurnPhase.move)
+        {
+            EnemyMove();
+            //moves enemy 
+
+            //then the enemy will attack 
+            enemyTurn = enemyTurnPhase.attack;
+        }
+        else if (enemyTurn == enemyTurnPhase.attack)
+        {
+            
+            EnemyAttack();
+            enemyTurn = enemyTurnPhase.move;
+
+        }
+
+        if (enemy_atk == true && enemy_Move == true)
+        {
+            // playerTurn = true;
+
+            enemy_atk = false;
+            enemy_Move = false;
+
+
+        }
+        ran = true;
+        //currentOpt = combatOptions.none;
+        //yield return new WaitForEndOfFrame();
     }
 
     bool dmgcheck = false;
@@ -782,7 +888,7 @@ public class CombatManager : MonoBehaviour
         //if we didn't hit submit, exit out 
         if(submit == false)
         {
-            return;
+            //return;
         }
        
         Debug.Log("Checking dmg");
@@ -809,6 +915,7 @@ public class CombatManager : MonoBehaviour
                         //if the tile space was done by the player 
                         if (attackBy[u] == "Player")
                         {
+<<<<<<< Updated upstream
                             //SET BACK*********
                             //enemyHealth[i]--;*****
 
@@ -818,6 +925,13 @@ public class CombatManager : MonoBehaviour
                             //play sound
                             audio.PlayOneShot(combatClips[1]);
                             Debug.Log(enemyHealth[i]);
+=======
+                            //decrease health
+                            enemyHealth[i]--;
+                           
+                            //Debug.Log("ENEMY TAKING DMG: " + i);
+                            //Debug.Log(enemyHealth[i]);
+>>>>>>> Stashed changes
                             if (enemyHealth[i] <= 0)
                             {
                                 delete = i;          
@@ -834,13 +948,42 @@ public class CombatManager : MonoBehaviour
                             }
                             //tile recolor 
                             tile_e.self.GetComponent<SpriteRenderer>().color = original_tile;
-                            u = Tiles_e.Count; //exit portion of sub loop 
+                            //u = Tiles_e.Count; //exit portion of sub loop 
                         }
                     }
                     
                     //tile_e.self.GetComponent<SpriteRenderer>().color = original_tile;
                    // u++;
                     
+                }
+            }
+            if(enemy.self.name == "boss")
+            {
+                Debug.Log("BOSS");
+                //random color to choose from 
+                var rand = (int)UnityEngine.Random.Range(0, 5);
+                //enemy.GetComponent<SpriteRenderer>()
+                switch (rand)
+                {
+                    case 0:
+                        enemy.self.GetComponent<SpriteRenderer>().color = Color.green;
+
+                        break;
+                    case 1:
+                        enemy.self.GetComponent<SpriteRenderer>().color = Color.red;
+
+                        break;
+                    case 2:
+                        enemy.self.GetComponent<SpriteRenderer>().color = Color.blue;
+                        break;
+                    case 3:
+                        enemy.self.GetComponent<SpriteRenderer>().color = Color.Lerp(Color.yellow, Color.green, 0.75f);
+                        break;
+                    case 4:
+                        enemy.self.GetComponent<SpriteRenderer>().color = Color.grey;
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -851,26 +994,45 @@ public class CombatManager : MonoBehaviour
             enemyHealth.RemoveAt(delete);
             Enemies.RemoveAt(delete);
             num_enemies--;
-
+            delete = -1;
         }
         if(Enemies.Count <= 0 || currentHealth <= 0) //end of battle 
         {
             EndBattle();
         }
+        Debug.Log("END OF CHECKING DMG");
         //if we made it this far and we hit submit
-        dmgcheck = true;
-        if (dmgcheck && submit)
+        if(dmgcheck == false)
         {
-            combatmenu.SetActive(true);
-            submit = false; //break out
+            dmgcheck = true;
         }
+        
+    }
+    void ResetEnemyTiles()
+    {
+        foreach (var i in en_changed)
+        {
+            tiles[i].GetComponent<SpriteRenderer>().color = original_tile;
+            attackBy[i] = "empty";
+        }
+        en_changed.Clear();
+    }
+    void ResetPlayerTiles()
+    {
+        foreach (var i in changed)
+        {
+            tiles[i].GetComponent<SpriteRenderer>().color = original_tile;
+            attackBy[i] = "empty";
+        }
+        changed.Clear();
     }
 
     //displays player attack by space 
     void AttackSpaceMove(Color c)
     {
+
         //if submit menu is off break out 
-        if (submitmenu.activeSelf == false)
+        if(submitmenu.activeSelf == false)
         {
             return;
         }
@@ -885,7 +1047,7 @@ public class CombatManager : MonoBehaviour
             if (moveidx - 7 >= 0) //S
             {
                 //reset the color
-                ResetTileColor();
+                ResetPlayerTiles();
                 //change temp index 
                 moveidx = currentPlayerTileIndex - 7;
                 //change direction 
@@ -898,7 +1060,7 @@ public class CombatManager : MonoBehaviour
         {
             if (moveidx + 7 <= tiles.Length) //N
             {
-                ResetTileColor();
+                ResetPlayerTiles();
                 moveidx = currentPlayerTileIndex + 7;
                 player_dir = Dir.up;
 
@@ -910,7 +1072,7 @@ public class CombatManager : MonoBehaviour
         {
             if (moveidx - 1 >= 0) //E
             {
-                ResetTileColor();
+                ResetPlayerTiles();
                 moveidx = currentPlayerTileIndex - 1;
                 player_dir = Dir.right;
 
@@ -922,7 +1084,7 @@ public class CombatManager : MonoBehaviour
         {
             if (moveidx + 1 <= tiles.Length) //W
             {
-                ResetTileColor();
+                ResetPlayerTiles();
                 moveidx = currentPlayerTileIndex + 1;
                 player_dir = Dir.left;
 
@@ -990,7 +1152,7 @@ public class CombatManager : MonoBehaviour
                     //set color 
                     Tiles_e[currentPlayerTileIndex + 1].self.GetComponent<SpriteRenderer>().color = c;
                     attackBy[currentPlayerTileIndex + 1] = "Player"; //reassigning space by 
-                    
+                    changed.Add(currentPlayerTileIndex + 1);
 
                 }
                 if (currentPlayerTileIndex - 1 >= 0)
@@ -1000,6 +1162,7 @@ public class CombatManager : MonoBehaviour
                     Tiles_e[currentPlayerTileIndex - 1] = new Entity(t, currentPlayerTileIndex - 1, "Player");
                     Tiles_e[currentPlayerTileIndex - 1].self.GetComponent<SpriteRenderer>().color = c;
                     attackBy[currentPlayerTileIndex - 1] = "Player";
+                    changed.Add(currentPlayerTileIndex - 1);
                 }
                 //up 
                 if (currentPlayerTileIndex + 7 < tiles.Length) //W
@@ -1009,6 +1172,7 @@ public class CombatManager : MonoBehaviour
                     Tiles_e[currentPlayerTileIndex + 7] = new Entity(t, currentPlayerTileIndex + 7, "Player");
                     Tiles_e[currentPlayerTileIndex + 7].self.GetComponent<SpriteRenderer>().color = c;
                     attackBy[currentPlayerTileIndex + 7] = "Player";
+                    changed.Add(currentPlayerTileIndex + 7);
                 }
                 if (currentPlayerTileIndex - 7 >= 0)
                 {
@@ -1017,6 +1181,7 @@ public class CombatManager : MonoBehaviour
                     Tiles_e[currentPlayerTileIndex - 7] = new Entity(t, currentPlayerTileIndex - 7, "Player");
                     Tiles_e[currentPlayerTileIndex - 7].self.GetComponent<SpriteRenderer>().color = c;
                     attackBy[currentPlayerTileIndex - 7] = "Player";
+                    changed.Add(currentPlayerTileIndex - 7);
                 }
                 break;
             case ElementAttacks.Ember:
@@ -1032,6 +1197,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx + 1] = new Entity(t, moveidx + 1, "Player");
                         Tiles_e[moveidx + 1].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx + 1] = "Player";
+                        changed.Add(moveidx + 1);
                     }
                     if (moveidx + 2 < tiles.Length) //W
                     {
@@ -1041,6 +1207,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx + 2].self.GetComponent<SpriteRenderer>().color = c;
                         moveidx = currentPlayerTileIndex;
                         attackBy[moveidx + 2] = "Player";
+                        changed.Add(moveidx + 2);
                     }
 
                 }
@@ -1053,6 +1220,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx] = "Player";
+                        changed.Add(moveidx);
                     }
                     if (moveidx - 1 >= 0)
                     {
@@ -1061,6 +1229,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx - 1] = new Entity(t, moveidx - 1, "Player");
                         Tiles_e[moveidx - 1].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx - 1] = "Player";
+                        changed.Add(moveidx - 1);
                     }
 
                 }
@@ -1074,6 +1243,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx] = "Player";
+                        changed.Add(moveidx);
 
                     }
                     if (moveidx + 7 < tiles.Length) //W
@@ -1083,6 +1253,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx + 7] = new Entity(t, moveidx + 7, "Player");
                         Tiles_e[moveidx + 7].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx + 7] = "Player";
+                        changed.Add(moveidx + 7);
                     }
 
                 }
@@ -1095,6 +1266,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx] = "Player";
+                        changed.Add(moveidx);
                     }
                     if (moveidx - 7 >= 0)
                     {
@@ -1103,6 +1275,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx - 7] = new Entity(t, moveidx - 7, "Player");
                         Tiles_e[moveidx - 7].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx - 7] = "Player";
+                        changed.Add(moveidx - 7);
                     }
 
                 }
@@ -1118,6 +1291,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx + 1] = new Entity(t, moveidx + 1, "Player");
                         Tiles_e[moveidx + 1].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx + 1] = "Player";
+                        changed.Add(moveidx + 1);
 
                     }
                     if (moveidx + 2 < tiles.Length) //W
@@ -1127,6 +1301,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx + 2] = new Entity(t, moveidx + 2, "Player");
                         Tiles_e[moveidx + 2].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx + 2] = "Player";
+                        changed.Add(moveidx + 2);
                         moveidx += 2;
                         if (moveidx + 7 < tiles.Length)
                         {
@@ -1135,6 +1310,7 @@ public class CombatManager : MonoBehaviour
                             Tiles_e[moveidx + 7] = new Entity(t, moveidx + 7, "Player");
                             Tiles_e[moveidx + 7].self.GetComponent<SpriteRenderer>().color = c;
                             attackBy[moveidx + 7] = "Player";
+                            changed.Add(moveidx + 7);
 
                         }
                         if (moveidx - 7 >= 0)
@@ -1144,6 +1320,7 @@ public class CombatManager : MonoBehaviour
                             Tiles_e[moveidx - 7] = new Entity(t, moveidx - 7, "Player");
                             Tiles_e[moveidx - 7].self.GetComponent<SpriteRenderer>().color = c;
                             attackBy[moveidx - 7] = "Player";
+                            changed.Add(moveidx - 7);
 
                         }
                     }
@@ -1158,6 +1335,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx] = "Player";
+                        changed.Add(moveidx);
                     }
                     if (moveidx - 1 >= 0)
                     {
@@ -1166,6 +1344,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx - 1] = new Entity(t, moveidx - 1, "Player");
                         Tiles_e[moveidx - 1].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx - 1] = "Player";
+                        changed.Add(moveidx - 1);
                         moveidx -= 1;
                         if (moveidx + 7 < tiles.Length)
                         {
@@ -1174,6 +1353,7 @@ public class CombatManager : MonoBehaviour
                             Tiles_e[moveidx + 7] = new Entity(t, moveidx + 7, "Player");
                             Tiles_e[moveidx + 7].self.GetComponent<SpriteRenderer>().color = c;
                             attackBy[moveidx + 7] = "Player";
+                            changed.Add(moveidx + 7);
 
                         }
                         if (moveidx - 7 >= 0)
@@ -1183,6 +1363,7 @@ public class CombatManager : MonoBehaviour
                             Tiles_e[moveidx - 7] = new Entity(t, moveidx - 7, "Player");
                             Tiles_e[moveidx - 7].self.GetComponent<SpriteRenderer>().color = c;
                             attackBy[moveidx - 7] = "Player";
+                            changed.Add(moveidx - 7);
 
                         }
                     }
@@ -1198,6 +1379,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx] = "Player";
+                        changed.Add(moveidx);
 
                     }
                     if (moveidx + 7 < tiles.Length)
@@ -1207,6 +1389,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx + 7] = new Entity(t, moveidx + 7, "Player");
                         Tiles_e[moveidx + 7].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx + 7] = "Player";
+                        changed.Add(moveidx + 7);
                         moveidx += 7;
                         if (moveidx + 1 < tiles.Length)
                         {
@@ -1215,6 +1398,7 @@ public class CombatManager : MonoBehaviour
                             Tiles_e[moveidx + 1] = new Entity(t, moveidx + 1, "Player");
                             Tiles_e[moveidx + 1].self.GetComponent<SpriteRenderer>().color = c;
                             attackBy[moveidx + 1] = "Player";
+                            changed.Add(moveidx + 1);
 
                         }
                         if (moveidx - 1 < tiles.Length)
@@ -1224,6 +1408,7 @@ public class CombatManager : MonoBehaviour
                             Tiles_e[moveidx - 1] = new Entity(t, moveidx - 1, "Player");
                             Tiles_e[moveidx - 1].self.GetComponent<SpriteRenderer>().color = c;
                             attackBy[moveidx - 1] = "Player";
+                            changed.Add(moveidx - 1);
 
                         }
                     }
@@ -1238,6 +1423,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
                         Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx] = "Player";
+                        changed.Add(moveidx);
                     }
                     if (moveidx - 7 >= 0)
                     {
@@ -1246,6 +1432,7 @@ public class CombatManager : MonoBehaviour
                         Tiles_e[moveidx - 7] = new Entity(t, moveidx - 7, "Player");
                         Tiles_e[moveidx - 7].self.GetComponent<SpriteRenderer>().color = c;
                         attackBy[moveidx - 7] = "Player";
+                        changed.Add(moveidx - 7);
                         moveidx -= 7;
                         if (moveidx + 1 < tiles.Length)
                         {
@@ -1254,6 +1441,7 @@ public class CombatManager : MonoBehaviour
                             Tiles_e[moveidx + 1] = new Entity(t, moveidx + 1, "Player");
                             Tiles_e[moveidx + 1].self.GetComponent<SpriteRenderer>().color = c;
                             attackBy[moveidx + 1] = "Player";
+                            changed.Add(moveidx + 1);
 
                         }
                         if (moveidx - 1 < tiles.Length)
@@ -1263,6 +1451,7 @@ public class CombatManager : MonoBehaviour
                             Tiles_e[moveidx - 1] = new Entity(t, moveidx - 1, "Player");
                             Tiles_e[moveidx - 1].self.GetComponent<SpriteRenderer>().color = c;
                             attackBy[moveidx - 1] = "Player";
+                            changed.Add(moveidx - 1);
 
                         }
                     }
@@ -1270,12 +1459,149 @@ public class CombatManager : MonoBehaviour
                 }
                 break;
             case ElementAttacks.Bind:
+                //left
+                if (diff == 0 && player_dir == Dir.left)
+                {
+                    if (moveidx + 1 < tiles.Length) //W
+                    {
+
+                        t = tiles[moveidx + 1];
+                        Tiles_e[moveidx + 1] = new Entity(t, moveidx + 1, "Player");
+                        Tiles_e[moveidx + 1].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx + 1] = "Player";
+                        changed.Add(moveidx + 1);
+                        moveidx = moveidx + 1;
+                    }
+                    if (moveidx + 7 < tiles.Length)
+                    {
+
+                        t = tiles[moveidx + 7];
+                        Tiles_e[moveidx + 7] = new Entity(t, moveidx + 7, "Player");
+                        Tiles_e[moveidx + 7].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx + 7] = "Player";
+                        changed.Add(moveidx + 7);
+
+                    }
+                    if (moveidx - 7 >= 0)
+                    {
+
+                        t = tiles[moveidx - 7];
+                        Tiles_e[moveidx - 7] = new Entity(t, moveidx - 7, "Player");
+                        Tiles_e[moveidx - 7].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx - 7] = "Player";
+                        changed.Add(moveidx - 7);
+
+                    }
+
+                }
+                if (diff == -1 && player_dir == Dir.right)
+                {
+                    if (moveidx >= 0)
+                    {
+
+                        t = tiles[moveidx];
+                        Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
+                        Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx] = "Player";
+                        changed.Add(moveidx);
+                    }
+                    if (moveidx + 7 < tiles.Length)
+                    {
+
+                        t = tiles[moveidx + 7];
+                        Tiles_e[moveidx + 7] = new Entity(t, moveidx + 7, "Player");
+                        Tiles_e[moveidx + 7].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx + 7] = "Player";
+                        changed.Add(moveidx + 7);
+
+                    }
+                    if (moveidx - 7 >= 0)
+                    {
+
+                        t = tiles[moveidx - 7];
+                        Tiles_e[moveidx - 7] = new Entity(t, moveidx - 7, "Player");
+                        Tiles_e[moveidx - 7].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx - 7] = "Player";
+                        changed.Add(moveidx - 7);
+
+                    }
+
+                }
+                //up 
+                if (diff == 7 && player_dir == Dir.up)
+                {
+                    if (moveidx < tiles.Length)
+                    {
+
+                        t = tiles[moveidx];
+                        Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
+                        Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx] = "Player";
+                        changed.Add(moveidx);
+
+                    }
+                    if (moveidx + 1 < tiles.Length)
+                    {
+
+                        t = tiles[moveidx + 1];
+                        Tiles_e[moveidx + 1] = new Entity(t, moveidx + 1, "Player");
+                        Tiles_e[moveidx + 1].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx + 1] = "Player";
+                        changed.Add(moveidx + 1);
+
+                    }
+                    if (moveidx - 1 < tiles.Length)
+                    {
+
+                        t = tiles[moveidx - 1];
+                        Tiles_e[moveidx - 1] = new Entity(t, moveidx - 1, "Player");
+                        Tiles_e[moveidx - 1].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx - 1] = "Player";
+                        changed.Add(moveidx - 1);
+
+                    }
+
+                }
+                if (diff == -7 && player_dir == Dir.down)
+                {
+                    if (moveidx >= 0)
+                    {
+
+                        t = tiles[moveidx];
+                        Tiles_e[moveidx] = new Entity(t, moveidx, "Player");
+                        Tiles_e[moveidx].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx] = "Player";
+                        changed.Add(moveidx);
+                    }
+                    if (moveidx + 1 < tiles.Length)
+                    {
+
+                        t = tiles[moveidx + 1];
+                        Tiles_e[moveidx + 1] = new Entity(t, moveidx + 1, "Player");
+                        Tiles_e[moveidx + 1].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx + 1] = "Player";
+                        changed.Add(moveidx + 1);
+
+                    }
+                    if (moveidx - 1 < tiles.Length)
+                    {
+
+                        t = tiles[moveidx - 1];
+                        Tiles_e[moveidx - 1] = new Entity(t, moveidx - 1, "Player");
+                        Tiles_e[moveidx - 1].self.GetComponent<SpriteRenderer>().color = c;
+                        attackBy[moveidx - 1] = "Player";
+                        changed.Add(moveidx - 1);
+
+                    }
+
+                }
                 break;
             case ElementAttacks.Harden:
                 t = tiles[currentPlayerTileIndex];
                 Tiles_e[currentPlayerTileIndex] = new Entity(t, currentPlayerTileIndex, "Player");
                 Tiles_e[currentPlayerTileIndex].self.GetComponent<SpriteRenderer>().color = c;
                 attackBy[currentPlayerTileIndex] = "Player";
+                changed.Add(currentPlayerTileIndex);
                 break;
             case ElementAttacks.none:
                 
@@ -1300,12 +1626,9 @@ public class CombatManager : MonoBehaviour
             
         }
 
-        if (back == true && submitmenu.activeSelf == true
-                && attackmenu.activeSelf == false)
-        {
 
-            back = false;
-        }
+        //yield return new WaitForEndOfFrame();
+
     }
 
     //resets tile space 
@@ -1322,22 +1645,26 @@ public class CombatManager : MonoBehaviour
     }
 
     bool moving = false;
-
+    bool hasMoved = false;
     //player movement 
     void PlayerMove()
     {
+
+       
+
         //if our movement menu is closed, then break out 
-        if(movemenu.activeSelf == false)
+        if(moveenter == true)
         {
-            return;
+            //return;
         }
        
         //if its the players turn and we're moving then set the players position 
-        if (moving && playerTurn == true)
+        if (moving)
         {
             StartCoroutine(Movement(currentPlayerTileIndex,Player));
         } //if we have num moves and its our turn //then we can use keyboard 
-        else if (num_moves > 0 && playerTurn == true)
+        else if (num_moves > 0 && currentOpt == combatOptions.move &&
+            moveenter == false)
         {
           
 
@@ -1416,12 +1743,13 @@ public class CombatManager : MonoBehaviour
             }
             
         } //if we ran out of moves or its not our turn anymore inbetween frames 
-        else if (num_moves <= 0 || playerTurn == false) {
-
-            //set move true to save last position 
-            move = true;
+        else if (num_moves <= 0 || moveenter == true) {
+            moving = false;
+            //Debug.Log("Done Moving");
+           // moveenter = true;
+            
         }
-        
+
         
     }
     //sets player positon based off of tile index 
@@ -1441,7 +1769,7 @@ public class CombatManager : MonoBehaviour
             }
         }
         //Debug.Log((entity.transform.position - tiles[index].transform.position).magnitude);
-        yield return new WaitForSeconds(1);
+        yield return new WaitForEndOfFrame();
     }
 
 
@@ -1561,6 +1889,7 @@ public class CombatManager : MonoBehaviour
     }
 
     bool enemy_atk = false;
+    
     void EnemyAttack()
     {
 
@@ -1700,6 +2029,7 @@ public class CombatManager : MonoBehaviour
         Tiles_e[index].self.GetComponent<SpriteRenderer>().color = enemy.self.GetComponent<SpriteRenderer>().color;
         Tiles_e[index] = new Entity(Tiles_e[index].self, index, "Enemy");
         attackBy[index] = "Enemy";
+        en_changed.Add(index);
         if (currentPlayerTileIndex==index)
         {
             //Debug.Log("Player Hit:");
