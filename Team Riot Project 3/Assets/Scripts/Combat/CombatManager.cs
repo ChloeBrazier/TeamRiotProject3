@@ -915,23 +915,23 @@ public class CombatManager : MonoBehaviour
                         //if the tile space was done by the player 
                         if (attackBy[u] == "Player")
                         {
-<<<<<<< Updated upstream
-                            //SET BACK*********
-                            //enemyHealth[i]--;*****
+
+                            
+                            //enemyHealth[i]--;
 
                             //enemy takes dmg 
-                            enemyHealth[i] = 0;
+                            //enemyHealth[i] = 0;
                             Debug.Log("ENEMY TAKING DMG: " + i);
                             //play sound
                             audio.PlayOneShot(combatClips[1]);
                             Debug.Log(enemyHealth[i]);
-=======
+
                             //decrease health
                             enemyHealth[i]--;
                            
                             //Debug.Log("ENEMY TAKING DMG: " + i);
                             //Debug.Log(enemyHealth[i]);
->>>>>>> Stashed changes
+
                             if (enemyHealth[i] <= 0)
                             {
                                 delete = i;          
