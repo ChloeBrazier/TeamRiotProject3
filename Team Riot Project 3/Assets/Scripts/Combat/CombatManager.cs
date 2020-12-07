@@ -1830,6 +1830,7 @@ public class CombatManager : MonoBehaviour
                         }
                         else { dir = EnemyMoveDir.none; }
                     }
+                    else { dir = EnemyMoveDir.none; }
                 }
                 else if (dir == EnemyMoveDir.left)
                 {
@@ -1845,6 +1846,7 @@ public class CombatManager : MonoBehaviour
                         }
                         else { dir = EnemyMoveDir.none; }
                     }
+                    else { dir = EnemyMoveDir.none; }
                 }
                 else if (dir == EnemyMoveDir.up)
                 {
@@ -1860,6 +1862,7 @@ public class CombatManager : MonoBehaviour
                         }
                         else { dir = EnemyMoveDir.none; }
                     }
+                    else { dir = EnemyMoveDir.none; }
                 }
                 else if (dir == EnemyMoveDir.right)
                 {
@@ -1875,6 +1878,7 @@ public class CombatManager : MonoBehaviour
                         }
                         else { dir = EnemyMoveDir.none; }
                     }
+                    else { dir = EnemyMoveDir.none; }
                 }
             }
             if(enemy.self != null)
